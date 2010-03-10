@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
-import util
 import os
 import codecs
+import time
 
 class Logger:
+    timeFormat = '%Y-%m-%d_%H-%M-%S'
     class __impl:
         def __init__(self, config):
             self.configuration = config
-            self.__logFile = self.createLogFile()
+            self.__logFile = self.createLogFile() 
           
         def getId(self):
             return id(self)
@@ -22,7 +23,7 @@ class Logger:
             if "logFileName" in self.configuration:
                 logFileName = self.configuration["logFileName"]
             else:             
-                logFileName = "%s.log" %util.getTimestamp()
+                logFileName = "%s.log" %time.strftime(Logger.timeFormat)
             
             try:
                 if not os.path.isdir(logDirectory):
@@ -37,7 +38,7 @@ class Logger:
                 raise RuntimeError, "Unable to open log file: %s" %errMsg 
         
         def log(self, msg, level="[INFO]"):
-            out = "%s %s %s\n" %(util.getTimestamp(),level,msg)
+            out = "%s %s %s\n" %(time.strftime(Logger.timeFormat),level,msg)
             print out
             self.__logFile.write(out)
             
