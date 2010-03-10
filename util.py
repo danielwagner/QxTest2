@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
 from log import Logger
+import os
+import subprocess
+import sys
+import re
 
 try:
     import json
@@ -14,7 +18,6 @@ except ImportError, e:
 # Attempts to determine the name of the operating system by using os.uname(),
 # falling back to platform.system()
 def getOperatingSystemName():
-    import os
     msg = "Couldn't determine operating system!"
   
     try:   
@@ -39,7 +42,6 @@ def getOperatingSystemName():
 # @param cmd {str} The command to be executed
 # @return {tuple} The command's return code, STDOUT output and STDERR output
 def invokePiped(cmd):
-  import subprocess
   p = subprocess.Popen(cmd, shell=True,
                        stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE,
@@ -56,7 +58,6 @@ def invokePiped(cmd):
 # @param cmd {str} The command to be executed
 # @return {int} The exit code of the process
 def invokeExternal(cmd):
-    import subprocess, sys
     p = subprocess.Popen(cmd, shell=True,
                          stdout=sys.stdout,
                          stderr=sys.stderr)
@@ -69,7 +70,6 @@ def invokeExternal(cmd):
 #
 # @param cmd {str} The command to be executed
 def invokeLog(cmd, file=None):
-    import subprocess
     p = subprocess.Popen(cmd, shell=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.STDOUT,
@@ -312,3 +312,12 @@ def locate(startDir, pattern):
     for path, dirs, files in os.walk(os.path.abspath(startDir)):
         for filename in fnmatch.filter(files, pattern):
             yield os.path.join(path, filename)
+
+
+def getLastLineFromString(string):
+    m = re.search("[\n\r](.*)$", string)
+    if m:
+        if m.group(1):
+            return m.group(1)
+    return None 
+    
