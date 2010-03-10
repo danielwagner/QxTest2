@@ -108,6 +108,8 @@ class TestRun:
                     #seleniumServer = SeleniumServer(seleniumConfig)
                     #seleniumServer.start()
                     simConf = self.getSimulationConfig(collection, "collections", browser)
+                    simConf["autPath"] = demoDir
+                    simConf["simulationScript"] = scriptFile
                     print repr(simConf)            
                     #sim = Simulation(simConf)
                     #sim.run()
