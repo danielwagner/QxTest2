@@ -4,6 +4,8 @@ import util
 from log import Logger
 import os
 import codecs
+import time
+import re
 
 try:
     import json
@@ -11,6 +13,8 @@ except ImportError, e:
     import simplejson as json
 
 class Builder():
+    timeFormat = '%Y-%m-%d_%H-%M-%S'
+  
     def __init__(self, config=None, simulate=False):
         self.log = Logger()
         self.simulate = simulate
@@ -43,20 +47,18 @@ class Builder():
 
     
     def buildApp(self, target):
-        import time
         buildLog = None
         if "buildLogDir" in self.config:
             buildLog = self.prepareBuildLog(self.config["buildLogDir"], target)
             
         cmd = "%s -w %s %s" %(self.config["batbuild"], self.config["stageDir"], self.config["targets"][target])
         
-        timeFormat = '%Y-%m-%d_%H-%M-%S'
         buildStatusFile = os.path.join(self.config["stageDir"], "trunk", "qooxdoo", "buildStatus.json")
         self.buildStatus = self.getBuildStatusFromFile(buildStatusFile)
         self.buildStatus[target] = {
           "SVNRevision" : util.getSvnVersion(os.path.join(self.config["stageDir"], "trunk")),
           "BuildError"  : False,
-          "BuildStarted" : time.strftime(timeFormat),
+          "BuildStarted" : time.strftime(Builder.timeFormat),
           "BuildFinished" : False
         }
         
@@ -64,7 +66,7 @@ class Builder():
             if buildLog:
                 buildLog.write("Building target %s: %s" %(target, cmd))
                 buildLog.close()
-                return
+            return
           
           
         if (self.config["buildLogLevel"] == "debug" and buildLog):
@@ -74,6 +76,11 @@ class Builder():
             return
         
         # Start build, only log errors
+        self.buildAppWithErrorLogging(target, cmd, buildLog)
+        
+        self.storeBuildStatus()
+        
+    def buildAppWithErrorLogging(self, target, cmd, buildLog):
         self.log.info("Building %s: %s" %(target,cmd))
         status, std, err = util.invokePiped(cmd) #@UnusedVariable
         if status > 0:
@@ -85,23 +92,16 @@ class Builder():
               
             """Get the last line of batbuild.py's STDERR output which contains
             the actual error message. """
-            import re
-            nre = re.compile('[\n\r](.*)$')
-            m = nre.search(err)
-            if m:
-                self.buildStatus[target]["BuildError"] = m.group(1)
+            error = util.getLastLineFromString(err)
+            if error:
+                self.buildStatus[target]["BuildError"] = error
         else:
             self.log.info("%s build finished without errors." %target)
-            self.buildStatus[target]["BuildFinished"] = time.strftime(timeFormat)
-              
-        #targetPath = os.path.join(self.config["stageDir"], "trunk", "qooxdoo", self.config["targets"][target])
-        #FIXME: wrong target path
-        #self.buildStatus[target]["SVNRevision"] = util.getSvnVersion(targetPath)
-        self.storeBuildStatus()
-        
+            self.buildStatus[target]["BuildFinished"] = time.strftime(Builder.timeFormat)
+          
     
     def logBuildErrors(self, buildLogFile, target, cmd, err):
-        self.log.error("Error while building %s , see build log file for details." %target)
+        self.log.error("Error while building %s, see build log file for details." %target)
         err = err.rstrip('\n')
         err = err.rstrip('\r')
         buildLogFile.write(target + "\n" + cmd + "\n" + err)
