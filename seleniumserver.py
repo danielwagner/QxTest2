@@ -5,6 +5,7 @@ from log import Logger
 from urllib2 import Request, urlopen, URLError
 import subprocess
 import time
+import os
 
 
 class SeleniumServer:
@@ -15,10 +16,11 @@ class SeleniumServer:
             if not self.configuration:
                 self.configuration = {
                     "seleniumHost" : "http://localhost",
-                    "seleniumPort" : 4444
+                    "seleniumPort" : 4444,
+                    "seleniumDir" : os.getcwd(),
+                    "seleniumServerJar" : "selenium-server.jar"
                 }
             self.simulate  = simulate
-            #self.start()
         
         
         def getId(self):
@@ -62,6 +64,7 @@ class SeleniumServer:
             
             if "javaBin" in self.configuration:
                 cmd = self.configuration["javaBin"]
+            
             cmd += " -jar " + self.configuration["seleniumDir"] + "/" 
             
             if "seleniumVersion" in self.configuration:
@@ -143,7 +146,6 @@ class SeleniumServer:
                   util.invokeExternal(self.configuration['killSelenium'])
               else:
                   self.log.error("No kill command known for this OS")
-
             
             
     __inst = None
@@ -162,3 +164,4 @@ class SeleniumServer:
 
     def __setattr__(self, attr, value):
         return setattr(self.__inst, attr, value)
+    
