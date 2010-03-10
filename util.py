@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
-from log import Logger
 import os
-import subprocess
-import sys
-import re
+import log
 
 try:
     import json
@@ -26,12 +23,12 @@ def getOperatingSystemName():
         try:
             import platform
             return platform.system()
-        except:
-            Logger().error("Unable to determine OS name:")
-            Logger().logError(e)
+        except Exception, e:
+            log.Logger().error("Unable to determine OS name:")
+            log.Logger().logError(e)
     except Exception, e:      
-        Logger().error("Unable to determine OS name:")
-        Logger().logError(e)
+        log.Logger().error("Unable to determine OS name:")
+        log.Logger().logError(e)
         return msg
       
 
@@ -42,6 +39,7 @@ def getOperatingSystemName():
 # @param cmd {str} The command to be executed
 # @return {tuple} The command's return code, STDOUT output and STDERR output
 def invokePiped(cmd):
+  import subprocess
   p = subprocess.Popen(cmd, shell=True,
                        stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE,
@@ -58,6 +56,8 @@ def invokePiped(cmd):
 # @param cmd {str} The command to be executed
 # @return {int} The exit code of the process
 def invokeExternal(cmd):
+    import subprocess
+    import sys
     p = subprocess.Popen(cmd, shell=True,
                          stdout=sys.stdout,
                          stderr=sys.stderr)
@@ -70,6 +70,7 @@ def invokeExternal(cmd):
 #
 # @param cmd {str} The command to be executed
 def invokeLog(cmd, file=None):
+    import subprocess
     p = subprocess.Popen(cmd, shell=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.STDOUT,
@@ -92,7 +93,6 @@ def sendMultipartMail(configuration):
   import smtplib
   from email.MIMEMultipart import MIMEMultipart
   from email.MIMEText import MIMEText
-  
   msg = MIMEMultipart()
   msg['Subject'] = configuration['subject']
   msg['From'] = configuration['mailFrom']
@@ -102,7 +102,7 @@ def sendMultipartMail(configuration):
   msgText = MIMEText(configuration['html'], 'html')
   msg.attach(msgText)
   
-  Logger().debug("Sending e-mail. Subject: " + configuration['subject'] + " Recipient: " 
+  log.Logger().debug("Sending e-mail. Subject: " + configuration['subject'] + " Recipient: " 
         + configuration['mailTo'])
   
   mailServer = smtplib.SMTP(configuration['smtpHost'], configuration['smtpPort'])  
@@ -138,20 +138,19 @@ def mergeDict(oldDict, newDict):
 # doesn't exist.
 def download(url, dir):
     import urllib
-    import os
     try:
         webFile = urllib.urlopen(url)
     except IOError, e:
-        Logger().error("util.download: Failed to download file %s" %url)
-        Logger().logError(e)
+        log.Logger().error("util.download: Failed to download file %s" %url)
+        log.Logger().logError(e)
         return
     
     try:
         if not os.path.isdir(dir):
             os.mkdir(dir)
     except Exception, e:
-        Logger().error("util.download: Failed to create directory %s" %dir)
-        Logger().logError(e)
+        log.Logger().error("util.download: Failed to create directory %s" %dir)
+        log.Logger().logError(e)
         return
     
     filename = url.split('/')[-1]
@@ -163,11 +162,11 @@ def download(url, dir):
         webFile.close()
         localFile.close()
     except Exception, e:
-        Logger().error("util.download: Failed to save file in %s" %localDir)
-        Logger().logError(e)
+        log.Logger().error("util.download: Failed to save file in %s" %localDir)
+        log.Logger().logError(e)
         return
     
-    Logger().debug("Downloaded file %s to dir %s" %(url,dir))
+    log.Logger().debug("Downloaded file %s to dir %s" %(url,dir))
     return localDir
 
 
@@ -179,13 +178,12 @@ def download(url, dir):
   # doesn't exist.
 def unzipToDir(file, dir):
     import zipfile
-    import os
     try:
         if not os.path.isdir(dir):
             os.mkdir(dir)
     except Exception, e:
-      Logger().error("util.unzipToDir: Failed to create directory")  
-      Logger().logError(e)
+      log.Logger().error("util.unzipToDir: Failed to create directory")  
+      log.Logger().logError(e)
       
     zfobj = zipfile.ZipFile(file)
     
@@ -195,7 +193,7 @@ def unzipToDir(file, dir):
     
     # If the top directory already exists, recursively delete it  
     if os.path.isdir(topDir):
-        Logger().info("util.unzipToDir: Deleting directory %s" %topDir)
+        log.Logger().info("util.unzipToDir: Deleting directory %s" %topDir)
         for root, dirs, files in os.walk(topDir, topdown=False):
             for name in files:
                 os.remove(os.path.join(root, name))
@@ -211,7 +209,7 @@ def unzipToDir(file, dir):
             outfile.write(zfobj.read(name))
             outfile.close()
     
-    Logger().debug("Unzipped file %s to dir %s" %(repr(file),dir))
+    log.Logger().debug("Unzipped file %s to dir %s" %(repr(file),dir))
     return topDir
 
   
@@ -228,7 +226,7 @@ def editConfigJson(configFilePath=None, newConfig=None):
     if not configFilePath or not newConfig:
         raise Exception("Missing parameter for editJobConfig!")
     
-    Logger().info("Editing config file %s" %configFilePath)
+    log.Logger().info("Editing config file %s" %configFilePath)
     configFile = codecs.open(configFilePath, 'r', 'utf-8')
     configJson = configFile.read()
     configFile.close()
@@ -240,24 +238,23 @@ def editConfigJson(configFilePath=None, newConfig=None):
     newConfigJson = demjson.encode(parsedConfig, strict=False, compactly=False, escape_unicode=True, encoding="utf-8")
 
     configFile = codecs.open(configFilePath, 'w', 'utf-8')
-    Logger().info("Writing new config to file: %s" %configFilePath)
+    log.Logger().info("Writing new config to file: %s" %configFilePath)
     configFile.write(newConfigJson)
     configFile.close()
 
 
 def killProcess(procName="None"):
-    import os
     osName = getOperatingSystemName()
     if not procName:
         return
     
     if "Linux" in osName or "Mac OS X" in osName:
-          Logger().info("Killing *nix process: %s" %procName)      
+          log.Logger().info("Killing *nix process: %s" %procName)      
           invokeExternal("pkill %s" %procName)
     else:
         script = "kill %s.vbs" %procName
         if (os.path.isfile(script)):
-            Logger().info("Killing Windows process: %s" %procName)
+            log.Logger().info("Killing Windows process: %s" %procName)
             invokeExternal("wscript %s" %script)
 
 
@@ -269,15 +266,15 @@ def getJsonFromUrl(url):
     try:
         jsonData = urllib.urlopen(url)
     except Exception, e:
-        Logger().error("util.getJsonFromUrl: Couldn't open URL %s" %url)
-        Logger().logError(e)
+        log.Logger().error("util.getJsonFromUrl: Couldn't open URL %s" %url)
+        log.Logger().logError(e)
     
     try:
         data = json.load(jsonData)
         return data
     except Exception, e:
-        Logger().error("Could not parse JSON: %s" %repr(jsonData))
-        Logger().logError(e)
+        log.Logger().error("Could not parse JSON: %s" %repr(jsonData))
+        log.Logger().logError(e)
 
 
 def getSvnVersion(path):
@@ -288,17 +285,17 @@ def getSvnVersion(path):
 
 
 def svnRevert(path):
-    Logger().debug("Reverting SVN repository %s" %path)
+    log.Logger().debug("Reverting SVN repository %s" %path)
     status, std, err = invokePiped("svn revert -R %s" %path) #@UnusedVariable
     if status > 0:
-        Logger().error("svn revert finished with error %s" %err)
+        log.Logger().error("svn revert finished with error %s" %err)
 
 
 def svnUpdate(path):
-    Logger().debug("Updating SVN repository %s" %path)
+    log.Logger().debug("Updating SVN repository %s" %path)
     status, std, err = invokePiped("svn up %s" %path) #@UnusedVariable
     if status > 0:
-        Logger().error("svn up finished with error %s" %err)
+        log.Logger().error("svn up finished with error %s" %err)
 
 
 def getHostName():
@@ -308,13 +305,14 @@ def getHostName():
 
 
 def locate(startDir, pattern):
-    import fnmatch, os
-    for path, dirs, files in os.walk(os.path.abspath(startDir)):
+    import fnmatch
+    for path, dirs, files in os.walk(os.path.abspath(startDir)): #@UnusedVariable
         for filename in fnmatch.filter(files, pattern):
             yield os.path.join(path, filename)
 
 
 def getLastLineFromString(string):
+    import re
     m = re.search("[\n\r](.*)$", string)
     if m:
         if m.group(1):

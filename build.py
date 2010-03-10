@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
-import util
-from log import Logger
 import os
 import codecs
 import time
-import re
+import util
+import log
 
 try:
     import json
@@ -16,7 +15,7 @@ class Builder():
     timeFormat = '%Y-%m-%d_%H-%M-%S'
   
     def __init__(self, config=None, simulate=False):
-        self.log = Logger()
+        self.log = log.Logger()
         self.simulate = simulate
         self.config = config
         try:
@@ -133,13 +132,13 @@ class Builder():
             statusFile = codecs.open(path, 'r', 'utf-8')
             statusJson = statusFile.read()
         except Exception, e:
-            Logger().warn("Unable to open build status file %s" %path)
+            log.Logger().warn("Unable to open build status file %s" %path)
         
         try:
             buildStatus = json.loads(statusJson)
-            Logger().debug("Build status retrieved from file %s" %path)
+            log.Logger().debug("Build status retrieved from file %s" %path)
         except Exception, e:
-            Logger().warn("Unable to parse build status from file %s" %path)
+            log.Logger().warn("Unable to parse build status from file %s" %path)
         
         return buildStatus
 
