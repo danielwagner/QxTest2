@@ -4,7 +4,7 @@ import util
 from log import Logger
 from logFormatter import QxLogFormat
 from simulationLogParser import SimulationLogParser
-from selenium import SeleniumServer
+from seleniumserver import SeleniumServer
 from build import Builder
 from lint import Lint
 import sys, os, re, random, codecs, urllib2, urllib
