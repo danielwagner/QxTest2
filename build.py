@@ -61,6 +61,9 @@ class Builder():
           "BuildFinished" : False
         }
         
+        if "branch" in self.config:
+            self.buildStatus[target]["branch"] = self.config["branch"] 
+        
         if (self.simulate):
             if buildLog:
                 buildLog.write("Building target %s: %s" %(target, cmd))

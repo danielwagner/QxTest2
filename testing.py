@@ -56,7 +56,7 @@ class TestRun:
         
         if "build" in self.configuration:
             buildConfig = self.configuration["build"]
-            buildConfig["buildLogDir"] = self.getConfigSetting(self.configuration["base"], "logDirectory", "") + "/" + buildConfig["buildLogDir"] 
+            buildConfig["buildLogDir"] = self.getConfigSetting(self.configuration["base"], "logDirectory", "") + "/" + buildConfig["buildLogDir"]
             builder = Builder(buildConfig)
             builder.buildAll()
             self.buildStatus = builder.buildStatus          
@@ -364,9 +364,13 @@ class TestRun:
             mailConf['subject'] += " " + mailConf['hostId']
         
         if autName in self.buildStatus:
+            branch = "unknown"
+            if "branch" in self.buildStatus[autName]:
+                branch = self.buildStatus[autName]["branch"]
+          
             if "SVNRevision" in self.buildStatus[autName]:
                 revision = self.buildStatus[autName]["SVNRevision"]
-                mailConf['subject'] += " (trunk r%s)" %revision
+                mailConf['subject'] += " (%s r%s)" %(branch,revision)
 
             if (self.buildStatus[autName]["BuildError"]):
                 self.mailConf['subject'] += " BUILD ERROR"
