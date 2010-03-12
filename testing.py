@@ -154,7 +154,7 @@ class TestRun:
         
         if self.getConfigSetting(self.configuration["reporting"], "mailTo", False):
             self.formatLog(simConf["testLogFile"], testReportFile, None)
-            self.sendReport(app, simConf["testLogFile"], self.configuration["reporting"])
+            self.sendReport(app, testReportFile, self.configuration["reporting"])
     
         reportServer = self.getConfigSetting(self.configuration["reporting"], "reportServer", False)
         if reportServer:
@@ -231,7 +231,7 @@ class TestRun:
         if self.getConfigSetting(self.configuration["reporting"], "mailTo", False):
             logFormatted = self.formatLog(dummyLogFile, testReportFile, ignore)
             if logFormatted:
-                self.sendReport(app, dummyLogFile, self.configuration["reporting"])
+                self.sendReport(app, testReportFile, self.configuration["reporting"])
             else:
                 self.log.warn("No report HTML to send.")
     
