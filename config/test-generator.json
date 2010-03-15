@@ -1,0 +1,17 @@
+{
+  "base": {
+    "type"               : "local",
+    "logDirectory"       : "/home/dwagner/workspace/qooxdoo-schlund/project/testing/devlogs"
+  },
+
+  "reporting" : {
+    "reportServer"        : "http://172.17.12.142/reports/testing/insertJson"
+  },
+
+  "generator" : [
+    {
+       "path" : "/var/www/qx/trunk/qooxdoo/application/portal",
+       "jobs" : ["build", "bogus"]
+    }
+  ]
+}

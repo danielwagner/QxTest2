@@ -1,0 +1,53 @@
+{
+  "base": {
+    "type"               : "local",
+    "logDirectory"       : "/home/dwagner/workspace/qooxdoo-schlund/project/testing/devlogs"
+  },
+
+  "reporting" : {
+    "reportServer"        : "http://172.17.12.142/reports/testing/insertJson"
+  },
+
+  "lint" : {
+    "ignoreMessages" : ["Use of deprecated global identifier", "Multiply declared identifier", "Protected data field"],
+    "targets" : [
+      {
+        "name" : "Framework", 
+        "path" : "/var/www/qx/trunk/qooxdoo/framework",
+        "ignoreClasses" : ["qx.bom.Selector"]
+      },
+      {
+        "name" : "APIViewer", 
+        "path" : "/var/www/qx/trunk/qooxdoo/component/apiviewer"
+      },
+      {
+        "name" : "Demobrowser", 
+        "path" : "/var/www/qx/trunk/qooxdoo/application/demobrowser"
+      },
+      {
+        "name" : "Feedreader", 
+        "path" : "/var/www/qx/trunk/qooxdoo/application/feedreader"
+      },
+      {
+        "name" : "Inspector", 
+        "path" : "/var/www/qx/trunk/qooxdoo/component/inspector"
+      },
+      {
+        "name" : "Playground", 
+        "path" : "/var/www/qx/trunk/qooxdoo/application/playground"
+      },
+      {
+        "name" : "Portal", 
+        "path" : "/var/www/qx/trunk/qooxdoo/application/portal"
+      },
+      {
+        "name" : "Showcase", 
+        "path" : "/var/www/qx/trunk/qooxdoo/application/showcase"
+      },
+      {
+        "name" : "Testrunner", 
+        "path" : "/var/www/qx/trunk/qooxdoo/component/testrunner"
+      }
+    ]
+  }
+}
