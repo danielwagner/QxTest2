@@ -322,4 +322,12 @@ def getLastLineFromString(string):
         if m.group(1):
             return m.group(1)
     return None 
-    
+
+
+def stripComments(jsonstr):
+    import re
+    eolComment = re.compile(r'(?<![a-zA-Z]:)//.*$', re.M)
+    mulComment = re.compile(r'/\*.*?\*/', re.S)
+    result = eolComment.sub('',jsonstr)
+    result = mulComment.sub('',result)
+    return result

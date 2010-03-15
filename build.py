@@ -167,25 +167,54 @@ class Builder():
         results = []
         for test in config:
             os.chdir(test["path"])
-            for job in test["jobs"]:
-                generator = "generate.py"
-                if not "Win" in util.getOperatingSystemName():
-                    generator = "./generate.py"
-                cmd = generator + " " + job
-                result = {
-                  "job" : job,
-                  "path" : test["path"],                  
-                  "startDate" : util.getTimestamp(),
-                  "revision" : util.getSvnVersion(test["path"]),
-                  "host" : util.getHostName()
-                }
+            jobList = Builder.__getGeneratorJobs(test)
+            
+            for job in jobList:
+                cmd = "python generate.py " + job
+                result = Builder.__getGeneratorResultDict(job, test["path"])
                 (ret,out,err) = util.invokePiped(cmd)
                 result["stopDate"] = util.getTimestamp()
                 result["returncode"] = ret
                 result["stdout"] = out
                 result["stderr"] = err 
-                results.append(result)        
-        os.chdir(initialPath)
-
-        return results
+                results.append(result)
         
+        os.chdir(initialPath)
+        return results
+
+    
+    @classmethod
+    def __getGeneratorJobs(cls, test):
+        if "jobs" in test:
+            return test["jobs"]
+        elif "config" in test:
+            jobList = []
+            import re
+            cmd = "python generate.py -c %s x" %test["config"]
+            (ret,out,err) = util.invokePiped(cmd)
+            
+            reg = re.compile("^  - (.+?)(?:\s|$)")
+            strParts = out.split("\n")
+            for part in strParts:
+                match = reg.search(part)
+                if match:
+                    if match.group(1):
+                        jobList.append(match.group(1))
+            
+            return jobList
+
+    
+    @classmethod
+    def __getGeneratorResultDict(cls, job, path):
+        result = {
+          "job" : job,
+          "path" : path,                  
+          "startDate" : util.getTimestamp(),
+          "revision" : util.getSvnVersion(path),
+          "host" : util.getHostName(),
+          "stopDate" : False,
+          "returncode" : False,
+          "stdout" : False,
+          "stderr" : False
+        }
+        return result
