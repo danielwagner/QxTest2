@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
+import sys, os, re, random, codecs, urllib
 import util
+import reporting
 from log import Logger
 from logFormatter import QxLogFormat
 from simulationLogParser import SimulationLogParser
 from seleniumserver import SeleniumServer
 from build import Builder
 from lint import Lint
-import sys, os, re, random, codecs, urllib2, urllib
 try:
     import json
 except ImportError, e:
@@ -130,8 +131,6 @@ class TestRun:
                 seleniumConfig["options"] = seleniumOptions
             seleniumServer = SeleniumServer(seleniumConfig)
             seleniumServer.start()
-      
-        #reportFile = os.path.join(self.configuration["base"]["reportDirectory"], self.startDate + '.html')
       
         if app in self.buildStatus:
             if self.buildStatus[app]["BuildError"]:
@@ -263,16 +262,6 @@ class TestRun:
             os.mkdir(reportPath)
         
         return os.path.join( reportPath, self.startDate + '.html')
-    
-
-    def getTrunkRevision(self, path, testType="local"):
-        if testType == "remote":
-            return util.getJsonFromUrl(path)
-        elif testType == "local":
-            revFile = open(path, "r")
-            return revFile.read()
-        else:
-            return ""
           
     
     def getDummyLog(self, testLogDir, autName, browserList, buildError):
@@ -337,7 +326,7 @@ class TestRun:
         totalErrorsRe = re.compile('<p class="totalerrors">Total errors in report: ([\d]*)</p>')
       
         osystem = ""
-        failed = ""
+        failed = False
         totalE = ""
         for line in reportFile:
             osys = osRe.search(line)
@@ -375,7 +364,7 @@ class TestRun:
             if (self.buildStatus[autName]["BuildError"]):
                 self.mailConf['subject'] += " BUILD ERROR"
         
-        if (failed != ""):
+        if (failed):
             mailConf['subject'] += ": %s test run(s) failed!" %failed
         else:
             mailConf['subject'] += ": %s issues" %totalE    
@@ -403,6 +392,28 @@ class TestRun:
         else:
             self.log.info("Getting report data for %s" %config["autName"])
         
+        testRunDict = self.getTestRunDict(config)
+        
+        slp = SimulationLogParser(logFile)
+        simulationData = slp.getSimulationData()
+        testRunDict["simulations"] = simulationData
+        
+        try:
+            if simulationData[0]["platform"] != "Unknown":
+                testRunDict["test_hostos"] = simulationData[0]["platform"]
+        except Exception:
+            pass
+        
+        self.log.info("Report data aggregated, sending request")
+        try:
+            response = reporting.sendResultToReportServer(reportServerUrl, testRunDict, "testRun")
+            self.log.info("Report server response: %s" %response)
+        except Exception, e:
+            self.log.error("Error sending test report to server")
+            self.log.logError(e)
+    
+
+    def getTestRunDict(self, config):
         autName = config["autName"]
         if "Source" in config["autName"]:
             autName = config["autName"][0:config["autName"].find("Source")]
@@ -435,45 +446,11 @@ class TestRun:
         
         if "devRun" in config:
           testRunDict["dev_run"] = config["devRun"]
-        
-        slp = SimulationLogParser(logFile)
-        simulationData = slp.getSimulationData()
-        #simulationData = simulationLogParser.parse(log_file)
-        testRunDict["simulations"] = simulationData
-        
-        try:
-            if simulationData[0]["platform"] != "Unknown":
-                testRunDict["test_hostos"] = simulationData[0]["platform"]
-        except Exception:
-            pass
-        
-        testRunJson = json.dumps(testRunDict)
-        
-        self.log.info("Report data aggregated, sending request")
-        postdata = urllib.urlencode({"testRun": testRunJson})
-        req = urllib2.Request(reportServerUrl, postdata)
-
-        try:
-            response = urllib2.urlopen(req)    
-        except urllib2.URLError, e:
-            self.log.error("Unable to contact report server: Error %s" %e.code)
-            errorFile = open("error.html", "w")
-            errorFile.write(e.read())
-            errorFile.close()
-            return
-        except urllib2.HTTPError, e:
-            errMsg = ""
-            if (e.code):
-                errMsg = repr(e.code)
-            self.log.error("Report server couldn't store report: %s" %errMsg)
-            return
           
-        content = response.read()    
-        self.log.info("Report server response: %s" %content)
+        return testRunDict
 
-
+    
     def runLint(self, config):
-        reportServer = self.getConfigSetting(self.configuration["reporting"], "reportServer", False)
         class LintOptions:
             def __init__(self, workdir = None):
                 self.workdir = workdir
@@ -490,7 +467,30 @@ class TestRun:
                 setattr(options, "ignoremessages", config["ignoreMessages"])
             
             lint = Lint(options)
-            lint.reportResults(reportServer)
+            
+            reportServer = self.getConfigSetting(self.configuration["reporting"], "reportServer", False)
+            if reportServer:
+                lintResult = lint.getFlatResult()
+                lintResult = self.getEnhancedLintResult(lintResult, target)
+                reporting.sendResultToReportServer(reportServer, lintResult, "lintRun")
+
+
+    def getEnhancedLintResult(self, lintResult, target):
+        for message in lintResult:
+            message["target"] = target["name"]
+            message["branch"] = "unknown"
+            message["revision"] = "unknown"
+            if target["name"] in self.buildStatus:
+                if "branch" in self.buildStatus[target["name"]]:
+                    message["branch"] = self.buildStatus[target["name"]]["branch"]
+                if "revision" in self.buildStatus[target["name"]]:
+                    message["revision"] = self.buildStatus[target["name"]]["revision"]
+            elif "Testrunner" in self.buildStatus:
+                if "branch" in self.buildStatus["Testrunner"]:
+                    message["branch"] = self.buildStatus["Testrunner"]["branch"]
+                if "revision" in self.buildStatus["Testrunner"]:
+                    message["revision"] = self.buildStatus["Testrunner"]["revision"]
+        return lintResult  
 
 
 class Simulation:

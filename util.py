@@ -277,6 +277,10 @@ def getJsonFromUrl(url):
         log.Logger().logError(e)
 
 
+def getJson(data):
+    return json.dumps(data)
+
+
 def getSvnVersion(path):
     #ret,out,err = invokePiped("svnversion %s" %path)
     out = invokePiped("svnversion %s" %path)[1]

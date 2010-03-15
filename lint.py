@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
+import os, re, sys
 import util, urllib, urllib2
 from log import Logger
-import os, re, sys
+import reporting
 try:
     import json
 except ImportError, e:
@@ -146,36 +147,30 @@ class Lint:
     
         return (genericmsg, member, hint)
 
-      
-    def getJson(self):
-        return json.dumps(self.lintData, sort_keys=True, indent=2)
+    
+    def getResult(self):
+        return self.lintData  
+    
+    
+    def getFlatResult(self):
+        flatData = []
+        data = self.getResult()
+        for message in data:
+            for messageDetails in data[message]:
+                flatMessage = {
+                  "message" : message,
+                  "member" : messageDetails["member"],
+                  "path" : messageDetails["path"],
+                  "line" : messageDetails["line"]
+                }
+                flatData.append(flatMessage)
+        return flatData
 
     
-    def reportResults(self, reportServerUrl):
-        if not reportServerUrl:
-            raise RuntimeError, "No report server URL specified"
-        self.log.info("Sending Lint results to report server")
-        postdata = urllib.urlencode({"lintRun": self.getJson()})
-        req = urllib2.Request(reportServerUrl, postdata)
+    def getResultJson(self):
+        return json.dumps(self.lintData, sort_keys=True, indent=2)
 
-        try:
-            response = urllib2.urlopen(req)    
-        except urllib2.URLError, e:
-            self.log.error("Unable to contact report server: Error %s" %e.code)
-            errorFile = open("reportingerror_lint.html", "w")
-            errorFile.write(e.read())
-            errorFile.close()
-            return
-        except urllib2.HTTPError, e:
-            errMsg = ""
-            if (e.code):
-                errMsg = repr(e.code)
-            self.log.error("Report server couldn't store report: %s" %errMsg)
-            return
-          
-        content = response.read()    
-        self.log.info("Report server response: %s" %content)
-
+        
 
 def getComputedConf():
     import optparse
