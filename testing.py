@@ -65,6 +65,15 @@ class TestRun:
         if "lint" in self.configuration:
             self.runLint(self.configuration["lint"])
         
+        if "generator" in self.configuration:
+            self.log.info("Starting Generator test run")
+            generatorResults = Builder.testGenerator(self.configuration["generator"])
+            reportServer = self.getConfigSetting(self.configuration["reporting"], "reportServer", False)
+            if reportServer:
+                self.log.info("Sending Generator test results to report server")
+                response = reporting.sendResultToReportServer(reportServer, generatorResults, "generatorRun")
+                self.log.info("Report Server response: %s" %response)
+        
         if not "testRun" in self.configuration:
             return
         

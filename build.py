@@ -160,4 +160,32 @@ class Builder():
         for target in self.config["targets"]:
             self.buildApp(target)
 
+    
+    @classmethod
+    def testGenerator(cls, config):
+        initialPath = os.getcwd()
+        results = []
+        for test in config:
+            os.chdir(test["path"])
+            for job in test["jobs"]:
+                generator = "generate.py"
+                if not "Win" in util.getOperatingSystemName():
+                    generator = "./generate.py"
+                cmd = generator + " " + job
+                result = {
+                  "job" : job,
+                  "path" : test["path"],                  
+                  "startDate" : util.getTimestamp(),
+                  "revision" : util.getSvnVersion(test["path"]),
+                  "host" : util.getHostName()
+                }
+                (ret,out,err) = util.invokePiped(cmd)
+                result["stopDate"] = util.getTimestamp()
+                result["returncode"] = ret
+                result["stdout"] = out
+                result["stderr"] = err 
+                results.append(result)        
+        os.chdir(initialPath)
+
+        return results
         
