@@ -38,7 +38,7 @@ class TestRun:
     
 
     def runPackage(self):
-        testType = self.configuration["base"]["type"]
+        testType = self.getConfigSetting(self.configuration["base"], "type", "standalone")
         
         self.buildStatus = {}
 
@@ -481,7 +481,9 @@ class TestRun:
             if reportServer:
                 lintResult = lint.getFlatResult()
                 lintResult = self.getEnhancedLintResult(lintResult, target)
-                reporting.sendResultToReportServer(reportServer, lintResult, "lintRun")
+                self.log.info("Sending Lint results to report server")
+                response = reporting.sendResultToReportServer(reportServer, lintResult, "lintRun")
+                self.log.info("Report Server response: %s" %response)
 
 
     def getEnhancedLintResult(self, lintResult, target):
@@ -564,9 +566,9 @@ class Simulation:
 if __name__ == "__main__":
     try:
         rc = 0
-        configFile = codecs.open(sys.argv[0], "r", "UTF-8")
+        configFile = codecs.open(sys.argv[1], "r", "UTF-8")
         config = json.load(configFile)
-        testRun= TestRun(config)
+        testRun = TestRun(config)
         testRun.runPackage()
     except KeyboardInterrupt:
         print

@@ -14,10 +14,13 @@ def sendResultToReportServer(reportServerUrl, data, resultType = "testRun" ):
     try:
         response = urllib2.urlopen(req)    
     except urllib2.URLError, e:
-        fileName = "reportservererror_%s.html" %util.getTimestamp()
-        errorFile = open(fileName, "w")
-        errorFile.write(e.read())
-        errorFile.close()
+        try:
+            fileName = "reportservererror_%s.html" %util.getTimestamp()
+            errorFile = open(fileName, "w")
+            errorFile.write(e.read())
+            errorFile.close()
+        except Exception:
+            pass
         raise RuntimeError, e
       
     return response.read()
