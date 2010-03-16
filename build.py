@@ -168,12 +168,16 @@ class Builder():
         for test in config:
             os.chdir(test["path"])
             jobList = Builder.__getGeneratorJobs(test)
+            configOption = ""
+            if "config" in test:
+                configOption = " -c %s" %test["config"]
             
             for job in jobList:
-                cmd = "python generate.py " + job
+                cmd = "python generate.py -s %s %s" %(configOption, job)
                 result = Builder.__getGeneratorResultDict(job, test["path"])
                 (ret,out,err) = util.invokePiped(cmd)
                 result["stopDate"] = util.getTimestamp()
+                result["command"] = cmd
                 result["returncode"] = ret
                 result["stdout"] = out
                 result["stderr"] = err 
@@ -208,7 +212,8 @@ class Builder():
     def __getGeneratorResultDict(cls, job, path):
         result = {
           "job" : job,
-          "path" : path,                  
+          "path" : path,
+          "command" : False, 
           "startDate" : util.getTimestamp(),
           "revision" : util.getSvnVersion(path),
           "host" : util.getHostName(),
