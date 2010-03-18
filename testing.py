@@ -128,12 +128,12 @@ class TestRun:
         
     
     def runSimsForApp(self, app, appConf):
-        seleniumConfig = self.configuration["selenium"]
-        
         testReportFile = self.prepareTestReport(self.getConfigSetting(self.configuration["base"], "reportDirectory", ""), app)
+        seleniumConfig = self.configuration["selenium"]        
         
+        manageSeleniumServer = self.getConfigSetting(seleniumConfig, "seleniumServerJar", False)
         individualServer = self.getConfigSetting(appConf, "individualServer", True)
-        if not individualServer:
+        if manageSeleniumServer and not individualServer:
             self.log.info("Using one Selenium server instance for all %s simulations." %app)            
             seleniumOptions = self.getConfigSetting(appConf, "seleniumServerOptions", None)
             if seleniumOptions:
@@ -149,14 +149,16 @@ class TestRun:
         self.log.info("Running simulations for %s" %app)
         
         for browser in appConf["browsers"]:
-            seleniumServer = SeleniumServer(seleniumConfig)
-            seleniumServer.start()
+            if manageSeleniumServer and individualServer:
+                seleniumServer = SeleniumServer(seleniumConfig)
+                seleniumServer.start()
             simConf = self.getSimulationConfig(app, "applications", browser)            
             sim = Simulation(simConf)
             sim.run()
-            seleniumServer.stop()
+            if manageSeleniumServer and individualServer:
+                seleniumServer.stop()
         
-        if not individualServer:
+        if manageSeleniumServer and not individualServer:
             seleniumServer = SeleniumServer(seleniumConfig)
             seleniumServer.stop()
         
@@ -186,13 +188,16 @@ class TestRun:
           "classPathSeparator" : self.getConfigSetting(self.configuration["base"], "classPathSeparator", ";"),                 
           "rhinoJar" : self.getConfigSetting(self.configuration["selenium"], "rhinoJar", None),
           "simulatorSvn" : self.getConfigSetting(self.configuration["testRun"], "simulatorDirectory", None),
-          "testLogFile" : self.getConfigSetting(self.configuration["base"], "logDirectory", "/var/log/qxTest") + "/" + autName + "/" + util.getTimestamp() + ".log" ,
           "autName" : autName,
           "autHost" : self.getConfigSetting(self.configuration["testRun"], "host", "http://localhost"),
           "browserId" : browserConf["browserId"],
           "browserLauncher" : self.configuration["browsers"][browserConf["browserId"]],
           "simulationScript" : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/portal/test_portal.js"
         }
+        
+        logDirectory = self.getConfigSetting(self.configuration["base"], "logDirectory", False)
+        if logDirectory:
+            simConf["testLogFile"] = logDirectory + "/" + autName + "/" + util.getTimestamp() + ".log" ,
          
         seleniumDir = self.getConfigSetting(self.configuration["selenium"], "seleniumDir", "")        
         seleniumClientDriverJar = self.getConfigSetting(self.configuration["selenium"], "seleniumClientDriverJar", "")
@@ -547,7 +552,8 @@ class Simulation:
           for opt in conf["simulationOptions"]:
             cmd += ' "%s"' %opt
         
-        cmd += " logFile=%s" %conf["testLogFile"]
+        if "testLogFile" in conf:
+            cmd += " logFile=%s" %conf["testLogFile"]
             
         return cmd
       
