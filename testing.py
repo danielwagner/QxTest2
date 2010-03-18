@@ -28,23 +28,38 @@ class TestRun:
         self.startDate = util.getTimestamp()
         self.configuration["base"]["testHostName"] = util.getHostName()
         self.log.info("New test run started on %s" %self.startDate)
-        
 
-    def getConfigSetting(self, dict, keyName, default=None):
-        if keyName in dict:
-            return dict[keyName]
-        else:
-            return default
+    
+    def getConfigSetting(self, path="", default=False, config=False):
+        if not config:
+            config = self.configuration
+        pathParts = path.split("/")
+        dict = config
+        while dict:
+            for keyName in pathParts:      
+              # invalid node name
+              if not keyName in dict:
+                  return default
+              # final search path node, so we've found the right setting
+              if keyName == pathParts[len(pathParts) - 1]:
+                  return dict[keyName]
+              # haven't reached the final step yet, but the current value is no dict so
+              # we've nowhere else to look
+              if type(dict[keyName]).__name__ != "dict":
+                  return default
+              # keep looking  
+              dict = dict[keyName]
+        return default  
     
 
     def runPackage(self):
-        testType = self.getConfigSetting(self.configuration["base"], "type", "standalone")
+        testType = self.getConfigSetting("base/type", "standalone")
         
         self.buildStatus = {}
 
         if testType == "remote" and "testRun" in self.configuration:
             jUrl = self.configuration["testRun"]["host"]
-            jUrl += self.getConfigSetting(self.configuration["testRun"], "qxPath", "")
+            jUrl += self.getConfigSetting("testRun/qxPath", "")
             jUrl += "buildStatus.json"
             self.buildStatus = util.getJsonFromUrl(jUrl)
         
@@ -57,7 +72,7 @@ class TestRun:
         
         if "build" in self.configuration:
             buildConfig = self.configuration["build"]
-            buildConfig["buildLogDir"] = self.getConfigSetting(self.configuration["base"], "logDirectory", "") + "/" + buildConfig["buildLogDir"]
+            buildConfig["buildLogDir"] = self.getConfigSetting("base/logDirectory", "") + "/" + buildConfig["buildLogDir"]
             builder = Builder(buildConfig)
             builder.buildAll()
             self.buildStatus = builder.buildStatus          
@@ -68,7 +83,7 @@ class TestRun:
         if "generator" in self.configuration:
             self.log.info("Starting Generator test run")
             generatorResults = Builder.testGenerator(self.configuration["generator"])
-            reportServer = self.getConfigSetting(self.configuration["reporting"], "reportServer", False)
+            reportServer = self.getConfigSetting("reporting/reportServer", False)
             if reportServer:
                 self.log.info("Sending Generator test results to report server")
                 response = reporting.sendResultToReportServer(reportServer, generatorResults, "generatorRun")
@@ -77,8 +92,8 @@ class TestRun:
         if not "testRun" in self.configuration:
             return
         
-        if self.getConfigSetting(self.configuration["testRun"], "updateSimulator", False):
-            util.svnUpdate(self.getConfigSetting(self.configuration["testRun"], "simulatorDirectory", ""))
+        if self.getConfigSetting("testRun/updateSimulator", False):
+            util.svnUpdate(self.getConfigSetting("testRun/simulatorDirectory", ""))
         
         if "applications" in self.configuration["testRun"]:
             for app in self.configuration["testRun"]["applications"]:
@@ -97,7 +112,7 @@ class TestRun:
         simulatorDirectory = os.path.join(simulatorBaseDir, "trunk", "tool", "selenium", "simulation", "demobrowser", "demo")
         print "running simulations for demos: " + repr(collConf)
         
-        testReportFile = self.prepareTestReport(self.getConfigSetting(self.configuration["base"], "reportDirectory", ""), collection)
+        #testReportFile = self.prepareTestReport(self.getConfigSetting("base/reportDirectory", ""), collection)
         
         startDir = collConf["startDir"]
         demoList = util.locate(startDir, "*.html")
@@ -128,14 +143,14 @@ class TestRun:
         
     
     def runSimsForApp(self, app, appConf):
-        testReportFile = self.prepareTestReport(self.getConfigSetting(self.configuration["base"], "reportDirectory", ""), app)
+        testReportFile = self.prepareTestReport(self.getConfigSetting("base/reportDirectory", ""), app)
         seleniumConfig = self.configuration["selenium"]        
         
-        manageSeleniumServer = self.getConfigSetting(seleniumConfig, "seleniumServerJar", False)
-        individualServer = self.getConfigSetting(appConf, "individualServer", True)
+        manageSeleniumServer = self.getConfigSetting("selenium/seleniumServerJar", False)
+        individualServer = self.getConfigSetting("individualServer", True, appConf)
         if manageSeleniumServer and not individualServer:
             self.log.info("Using one Selenium server instance for all %s simulations." %app)            
-            seleniumOptions = self.getConfigSetting(appConf, "seleniumServerOptions", None)
+            seleniumOptions = self.getConfigSetting("seleniumServerOptions", None, appConf)
             if seleniumOptions:
                 seleniumConfig["options"] = seleniumOptions
             seleniumServer = SeleniumServer(seleniumConfig)
@@ -152,7 +167,7 @@ class TestRun:
             if manageSeleniumServer and individualServer:
                 seleniumServer = SeleniumServer(seleniumConfig)
                 seleniumServer.start()
-            simConf = self.getSimulationConfig(app, "applications", browser)            
+            simConf = self.getSimulationConfig(app, "applications", browser)
             sim = Simulation(simConf)
             sim.run()
             if manageSeleniumServer and individualServer:
@@ -162,11 +177,11 @@ class TestRun:
             seleniumServer = SeleniumServer(seleniumConfig)
             seleniumServer.stop()
         
-        if self.getConfigSetting(self.configuration["reporting"], "mailTo", False):
+        if self.getConfigSetting("reporting/mailTo", False):
             self.formatLog(simConf["testLogFile"], testReportFile, None)
             self.sendReport(app, testReportFile, self.configuration["reporting"])
     
-        reportServer = self.getConfigSetting(self.configuration["reporting"], "reportServer", False)
+        reportServer = self.getConfigSetting("reporting/reportServer", False)
         if reportServer:
             reportConf = {
               "autName" : app,
@@ -184,48 +199,48 @@ class TestRun:
         self.log.info("Getting configuration for %s on %s" %(autName,browserConf["browserId"]))
         currentAppConf = self.configuration["testRun"][configKey][autName]
         simConf = {
-          "javaBin" : self.getConfigSetting(self.configuration["base"], "javaBin", "java"),
-          "classPathSeparator" : self.getConfigSetting(self.configuration["base"], "classPathSeparator", ";"),                 
-          "rhinoJar" : self.getConfigSetting(self.configuration["selenium"], "rhinoJar", None),
-          "simulatorSvn" : self.getConfigSetting(self.configuration["testRun"], "simulatorDirectory", None),
+          "javaBin" : self.getConfigSetting("base/javaBin", "java"),
+          "classPathSeparator" : self.getConfigSetting("base/classPathSeparator", ";"),                 
+          "rhinoJar" : self.getConfigSetting("selenium/rhinoJar", None),
+          "simulatorSvn" : self.getConfigSetting("testRun/simulatorDirectory", None),
           "autName" : autName,
-          "autHost" : self.getConfigSetting(self.configuration["testRun"], "host", "http://localhost"),
+          "autHost" : self.getConfigSetting("testRun/host", "http://localhost"),
           "browserId" : browserConf["browserId"],
           "browserLauncher" : self.configuration["browsers"][browserConf["browserId"]],
           "simulationScript" : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/portal/test_portal.js"
         }
         
-        logDirectory = self.getConfigSetting(self.configuration["base"], "logDirectory", False)
+        logDirectory = self.getConfigSetting("base/logDirectory", False)
         if logDirectory:
-            simConf["testLogFile"] = logDirectory + "/" + autName + "/" + util.getTimestamp() + ".log" ,
+            simConf["testLogFile"] = "%s/%s/%s.log" %(logDirectory,autName,util.getTimestamp())
          
-        seleniumDir = self.getConfigSetting(self.configuration["selenium"], "seleniumDir", "")        
-        seleniumClientDriverJar = self.getConfigSetting(self.configuration["selenium"], "seleniumClientDriverJar", "")
+        seleniumDir = self.getConfigSetting("selenium/seleniumDir", "")        
+        seleniumClientDriverJar = self.getConfigSetting("selenium/seleniumClientDriverJar", "")
 
-        seleniumVersion = self.getConfigSetting(browserConf, "seleniumVersion", None)
+        seleniumVersion = self.getConfigSetting("seleniumVersion", None, browserConf)
         if not seleniumVersion:
-            seleniumVersion = self.getConfigSetting(currentAppConf, "seleniumVersion", None)
+            seleniumVersion = self.getConfigSetting("seleniumVersion", None, currentAppConf)
         if not seleniumVersion:
-            seleniumVersion = self.getConfigSetting(self.configuration["testRun"], "seleniumVersion", "current")
+            seleniumVersion = self.getConfigSetting("testRun/seleniumVersion", "current")
         
         simConf["seleniumClientDriverJar"] = seleniumDir + "/" + seleniumVersion + "/" + seleniumClientDriverJar
         
-        autPath = self.getConfigSetting(currentAppConf, "path", "")
-        autQxPath = self.getConfigSetting(self.configuration["testRun"], "qxPath", "") 
+        autPath = self.getConfigSetting("path", "", currentAppConf)
+        autQxPath = self.getConfigSetting("testRun/qxPath", "") 
         simConf["autPath"] = autQxPath + autPath
         
-        simulationOptions = self.getConfigSetting(browserConf, "simulationOptions", None)
+        simulationOptions = self.getConfigSetting("simulationOptions", None, browserConf)
         if not simulationOptions:
-            simulationOptions = self.getConfigSetting(currentAppConf, "simulationOptions", None)
+            simulationOptions = self.getConfigSetting("simulationOptions", None, currentAppConf)
         if not simulationOptions:
-            simulationOptions = self.getConfigSetting(self.configuration["testRun"], "simulationOptions", None)
+            simulationOptions = self.getConfigSetting("testRun/simulationOptions", None)
         simConf["simulationOptions"] = simulationOptions
         
-        simulationScript = self.getConfigSetting(browserConf, "simulationScript", None)
+        simulationScript = self.getConfigSetting("simulationScript", None, browserConf)
         if not simulationScript:
-            simulationScript = self.getConfigSetting(currentAppConf, "simulationScript", None)
+            simulationScript = self.getConfigSetting("simulationScript", None, currentAppConf)
         if not simulationScript:
-            simulationScript = self.getConfigSetting(self.configuration["testRun"], "simulationScript", None)
+            simulationScript = self.getConfigSetting("testRun/simulationScript", None)
         simConf["simulationScript"] = simulationScript
         
         return simConf
@@ -241,14 +256,14 @@ class TestRun:
         
         #TODO: ignore
         ignore = None
-        if self.getConfigSetting(self.configuration["reporting"], "mailTo", False):
+        if self.getConfigSetting("reporting/mailTo", False):
             logFormatted = self.formatLog(dummyLogFile, testReportFile, ignore)
             if logFormatted:
                 self.sendReport(app, testReportFile, self.configuration["reporting"])
             else:
                 self.log.warn("No report HTML to send.")
     
-        reportServer = self.getConfigSetting(self.configuration["reporting"], "reportServer", False)
+        reportServer = self.getConfigSetting("reporting/reportServer", False)
         if reportServer:
             reportConf = {
               "autName" : app,
@@ -482,7 +497,7 @@ class TestRun:
             
             lint = Lint(options)
             
-            reportServer = self.getConfigSetting(self.configuration["reporting"], "reportServer", False)
+            reportServer = self.getConfigSetting("reporting/reportServer", False)
             if reportServer:
                 lintResult = lint.getFlatResult()
                 lintResult = self.getEnhancedLintResult(lintResult, target)
