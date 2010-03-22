@@ -18,13 +18,18 @@ except ImportError, e:
         raise RuntimeError, "No JSON module available"
 
 class TestRun:
-    def __init__(self, config, simulate=False):
-        logConfig = {}
-        if "logDirectory" in config["base"]:
-            logConfig["logDirectory"] = config["base"]["logDirectory"] 
-        self.log = Logger(logConfig)
-        self.simulate = simulate
+    def __init__(self, config, simulate=False, logger=None):
         self.configuration = config
+        if "type" in self.configuration and self.configuration["type"] == "standalone-generator":
+            self.configuration = self.getConfigFromGenerator()
+        
+        if not logger:
+            self.log = self.getLogger()
+        else:
+            self.log = logger
+        
+        self.simulate = simulate
+        
         self.startDate = util.getTimestamp()
         self.configuration["base"]["testHostName"] = util.getHostName()
         self.log.info("New test run started on %s" %self.startDate)
@@ -52,6 +57,63 @@ class TestRun:
         return default  
     
 
+    def getLogger(self):
+        logConfig = {}
+        if "logDirectory" in self.configuration["base"]:
+            logConfig["logDirectory"] = self.configuration["base"]["logDirectory"] 
+        return Logger(logConfig)
+    
+    
+    def getConfigFromGenerator(self):
+        jobConfig = self.configuration
+        seleniumPath = os.path.abspath(jobConfig["selenium-java-client"])
+        testConfig = {
+          "base" : {
+            "type" : "standalone",
+          },
+          
+          "selenium" : {
+            "seleniumHost" : jobConfig["selenium-host"],
+            "seleniumPort" : jobConfig["selenium-port"],
+            "rhinoJar" : jobConfig["rhino"],
+            "seleniumDir" : os.path.dirname(seleniumPath),
+            "seleniumClientDriverJar" : os.path.basename(seleniumPath),
+          },
+          
+          "browsers" : {
+            "Browser" : jobConfig["browser"]              
+          },
+          
+          "testRun" : {
+            "simulatorDirectory" : jobConfig["simulator"],
+            "host" : jobConfig["aut-host"],
+            "applications" : {}
+          }
+        }
+        
+        autName = jobConfig["aut-name"]
+        testConfig["testRun"]["applications"][autName] = {
+          "path" : jobConfig["aut-path"],
+          "simulationScript" : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/feedreader/test_feedreader.js",
+          "processLog" : True,
+          "browsers" : [
+            {
+               "browserId" : "Browser"
+            }
+          ] 
+        }
+        
+        simulationOptions = ["logger=console"]
+        if "simulation-options" in jobConfig:
+            simulationOptions.extend(jobConfig["simulation-options"])
+        testConfig["testRun"]["applications"][autName]["simulationOptions"] = simulationOptions
+        
+        if "java-classpath-separator" in jobConfig:
+            testConfig["base"]["classPathSeparator"] = jobConfig["java-classpath-separator"] 
+        
+        return testConfig
+    
+    
     def runPackage(self):
         testType = self.getConfigSetting("base/type", "standalone")
         
@@ -168,7 +230,7 @@ class TestRun:
                 seleniumServer = SeleniumServer(seleniumConfig)
                 seleniumServer.start()
             simConf = self.getSimulationConfig(app, "applications", browser)
-            sim = Simulation(simConf)
+            sim = Simulation(simConf, logger=self.log)
             sim.run()
             if manageSeleniumServer and individualServer:
                 seleniumServer.stop()
@@ -207,7 +269,7 @@ class TestRun:
           "autHost" : self.getConfigSetting("testRun/host", "http://localhost"),
           "browserId" : browserConf["browserId"],
           "browserLauncher" : self.configuration["browsers"][browserConf["browserId"]],
-          "simulationScript" : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/portal/test_portal.js"
+          "processLog" : self.getConfigSetting("processLog", None, currentAppConf)
         }
         
         logDirectory = self.getConfigSetting("base/logDirectory", False)
@@ -525,10 +587,15 @@ class TestRun:
 
 
 class Simulation:
-    def __init__(self, config, simulate=False):
-        self.log = Logger()
+    def __init__(self, config, simulate=False, logger=None):
         self.configuration = config
         self.simulate  = simulate
+        
+        if not logger:
+            self.log = Logger()
+        else:            
+            self.log = logger
+        
         self.startCmd = self.getStartCmd()
 
 
@@ -575,13 +642,22 @@ class Simulation:
       
     def run(self):
         conf = self.configuration
-        logMsg = "Testing %s in %s: %s" %(conf['autName'], conf["browserId"], self.startCmd)
+        infoMsg = "Testing %s in %s" %(conf['autName'], conf["browserId"])
+        debugMsg = "Selenium command line: %s" %self.startCmd
         
         if (self.simulate):
-            self.log.info("SIMULATION: %s" %logMsg)
+            self.log.info("SIMULATION: %s" %infoMsg)
+            self.log.debug(debugMsg)
         else:
-            self.log.info(logMsg)
-            util.invokeExternal(self.startCmd)
+            self.log.info(infoMsg)
+            self.log.debug(debugMsg)
+            
+            #TODO: out.split("\n")
+            if self.configuration["processLog"]:
+                util.invokeLog(self.startCmd, self.log, True)
+            
+            else:
+                util.invokeExternal(self.startCmd)
 
 
 if __name__ == "__main__":

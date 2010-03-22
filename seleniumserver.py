@@ -10,8 +10,7 @@ import os
 
 class SeleniumServer:
     class __impl:
-        def __init__(self, config=None, simulate=False):
-            self.log = Logger()
+        def __init__(self, config=None, simulate=False, logger=None):            
             self.configuration = config
             if not self.configuration:
                 self.configuration = {
@@ -21,6 +20,11 @@ class SeleniumServer:
                     "seleniumServerJar" : "selenium-server.jar"
                 }
             self.simulate  = simulate
+            
+            if not logger:
+                self.log = Logger()
+            else:            
+                self.log = logger
         
         
         def getId(self):

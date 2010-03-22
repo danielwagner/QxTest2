@@ -65,11 +65,14 @@ def invokeExternal(cmd):
 
 
 ##
-# Invokes a shell command and get its STDOUT/STDERR output while the process is 
-# running. Optionally writes the output to a file object.
+# Invokes a shell command and gets its STDOUT/STDERR output while the process is 
+# running. Optionally writes the output to either a file-like object or a logger
+# object that has an "info" function.
 #
 # @param cmd {str} The command to be executed
-def invokeLog(cmd, file=None):
+# @param log {obj} Log file object or logger
+# @param quiet {bool} Print the process' output
+def invokeLog(cmd, log=None, quiet=False):
     import subprocess
     p = subprocess.Popen(cmd, shell=True,
                            stdout=subprocess.PIPE,
@@ -80,16 +83,22 @@ def invokeLog(cmd, file=None):
         line = p.stdout.readline()
         if (not line): 
             break
-        print(line.rstrip("\n"))
-        if file:
-            file.write(line)
+        
+        if not quiet:
+            print(line.rstrip("\n"))
+        
+        if log:
+            if type(log).__name__ == "file":
+                log.write(line)
+            elif hasattr(log, "info"):
+                log.info(line.rstrip("\n"))
 
 
 ##
 # Sends a multipart text/html e-mail
 #
 # @param configuration {dict} Mail settings 
-def sendMultipartMail(configuration):  
+def sendMultipartMail(configuration):
   import smtplib
   from email.MIMEMultipart import MIMEMultipart
   from email.MIMEText import MIMEText
