@@ -94,7 +94,7 @@ class TestRun:
         autName = jobConfig["aut-name"]
         testConfig["testRun"]["applications"][autName] = {
           "path" : jobConfig["aut-path"],
-          "simulationScript" : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/feedreader/test_feedreader.js",
+          "simulationScript" : jobConfig["simulator"] + "/simpleTest.js",
           "processLog" : True,
           "browsers" : [
             {
@@ -104,6 +104,11 @@ class TestRun:
         }
         
         simulationOptions = ["logger=console"]
+        
+        simulationOptions.append("testClasspath=" + jobConfig["test-classpath"])
+        testClasses = ",".join(jobConfig["test-include"])
+        simulationOptions.append("testClasses=" + testClasses)
+        
         if "simulation-options" in jobConfig:
             simulationOptions.extend(jobConfig["simulation-options"])
         testConfig["testRun"]["applications"][autName]["simulationOptions"] = simulationOptions
