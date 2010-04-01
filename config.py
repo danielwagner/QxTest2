@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-#import simplejson as json
 
 conf = {
   "base": {
@@ -12,10 +11,10 @@ conf = {
   },
   
   "reporting" : {
-    "mailFrom"            : "testing@qooxdoo.org",
-    "mailTo"              : "daniel.wagner@1und1.de",
-    "smtpHost"            : "smtp.1und1.de",
-    "smtpPort"            : 587,
+    #"mailFrom"            : "testing@qooxdoo.org",
+    #"mailTo"              : "daniel.wagner@1und1.de",
+    #"smtpHost"            : "smtp.1und1.de",
+    #"smtpPort"            : 587,
     "reportServer"        : "http://172.17.12.142/reports/testing/insertJson"
   },
   
@@ -27,7 +26,7 @@ conf = {
     "rhinoJar"                : "/home/dwagner/workspace/qooxdoo-schlund/project/testing/rhino/current/js.jar",
     "seleniumHost"            : "http://localhost",
     "seleniumPort"            : 4444,
-    "killSelenium"            : "wscript ../../tool/killselenium.vbs"            
+    #"killSelenium"            : "wscript ../../tool/killselenium.vbs"            
   },
   
   "browsers" : {
@@ -36,7 +35,8 @@ conf = {
     'Firefox 3.0'       : '*firefox3 /usr/lib/firefox-3.0/firefox',
     'Firefox 3.5'       : '*firefox3 /usr/lib/firefox-3.5/firefox-bin',
     'Firefox 3.6'       : '*firefox3 /usr/lib/firefox-3.6/firefox-bin',
-    'Opera 9.64'        : '*opera',
+    'Opera 9.64'        : '*opera /usr/bin/opera-9.6',
+    'Opera 10.10'       : '*opera /usr/bin/opera-10.10',
     'Chrome 4b'         : '*googlechrome /opt/google/chrome/google-chrome'
   },
     
@@ -44,18 +44,18 @@ conf = {
     "simulatorDirectory"    : "/home/dwagner/workspace/qooxdoo.contrib/Simulator",
     "updateSimulator"       : False,
     "host"                  : "http://172.17.12.142",
-    "qxPath"                : "/qx/trunk/qooxdoo",    
-    "XXXapplications" : {
+    "qxPath"                : "/qx/trunk/qooxdoo",
+    "applications" : {
                       
-#      "API" : {
-#        "path"                  : "/framework/api/index.html",
-#        "simulationScript"      : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/api/test_api.js",
-#        "browsers" : [
-#          {
-#            "browserId"             : "Firefox 3.5"
-#          }
-#        ] 
-#      },
+      "API" : {
+        "path"                  : "/framework/api/index.html",
+        "simulationScript"      : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/api/test_api.js",
+        "browsers" : [
+          {
+            "browserId"             : "Firefox 3.6"
+          }
+        ] 
+      },
       
 #      "APIViewer" : {
 #        "path"                  : "/framework/api/index.html",
@@ -90,7 +90,7 @@ conf = {
 #      "Inspector" : {
 #        "path"                  : "/component/inspector/build/index.html",
 #        "simulationScript"      : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/inspector/test_inspector.js",
-#        'options' : ['inspectedApplication=/qx/trunk/qooxdoo/application/feedreader/build/'],
+#        'simulationOptions' : ['inspectedApplication=/qx/trunk/qooxdoo/application/feedreader/build/'],
 #        "browsers" : [
 #          {
 #            "browserId"             : "Firefox 3.5"
@@ -113,7 +113,7 @@ conf = {
 #        "simulationScript"      : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/portal/test_portal.js",
 #        "browsers" : [
 #          {
-#            "browserId"             : "Firefox 3.5"
+#            "browserId"             : "Firefox 3.6"
 #          }
 #        ] 
 #      },
@@ -140,81 +140,39 @@ conf = {
     
     },
     
-    "collections" : {
-       "Demos" : {
-         "path" : "/application/demobrowser/build/demo",
-         "startDir" : "/var/www/qx/trunk/qooxdoo/application/demobrowser/build/demo", 
-         "simulationScript" : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/demobrowser/demo",
-         "browsers" : [
-           {
-             "browserId"             : "Firefox 3.5"
-           }
-         ]
-       }
+    "XXXcollections" : {
+      "Demos" : {
+        "path" : "/application/demobrowser/build/demo",
+        "startDir" : "/var/www/qx/trunk/qooxdoo/application/demobrowser/build/demo", 
+        "simulationScript" : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/demobrowser/demo",
+        "browsers" : [
+          {
+            "browserId"             : "Firefox 3.6"
+          }
+        ]
+      }
     }
     
   },
   
-  "buildXXX" : {
+  "XXXbuild" : {
     "svnRevert"     : True,
     "svnUpdate"     : True,
+    "branch"        : "trunk",
     'stageDir'      : '/var/www/qx',
-    'buildLogDir'   : 'build',
+    'buildLogDir'   : '/home/dwagner/workspace/qooxdoo-schlund/project/testing/devlogs/build',
     'buildLogLevel' : 'error',
     'batbuild'      : '/home/dwagner/workspace/qooxdoo.trunk/tool/admin/app/batserver/batbuild.py',
     'targets' : {
-      'Testrunner'  : '-z -C -p framework -g test -n',
+      #'Testrunner'  : '-z -C -p framework -g test -n',
       #'Demobrowser' : '-z -C -p application/demobrowser -g build -n',
-      'Showcase'    : '-z -C -p application/showcase -g build -n',
-      'Feedreader'  : '-z -C -p application/feedreader -g build -n',
-      'Playground'  : '-z -C -p application/playground -g build -n',
+      #'Showcase'    : '-z -C -p application/showcase -g build -n',
+      #'Feedreader'  : '-z -C -p application/feedreader -g build -n',
+      #'Playground'  : '-z -C -p application/playground -g build -n',
       'Portal'      : '-z -C -p application/portal -g build -n',
-      'APIViewer'   : '-z -p framework -g api -n',
-      'Inspector'   : '-z -C -p component/inspector -g build -n'
+      #'APIViewer'   : '-z -p framework -g api -n',
+      #'Inspector'   : '-z -C -p component/inspector -g build -n'
     }
-  },
-  
-  "lintXXX" : {
-    "ignoreMessages" : ["Use of deprecated global identifier", "Multiply declared identifier", "Protected data field"],
-    "targets" : [
-      {
-        "name" : "APIViewer", 
-        "path" : "/var/www/qx/trunk/qooxdoo/component/apiviewer"
-      },
-      {
-        "name" : "Demobrowser", 
-        "path" : "/var/www/qx/trunk/qooxdoo/application/demobrowser"
-      },
-      {
-        "name" : "Feedreader", 
-        "path" : "/var/www/qx/trunk/qooxdoo/application/feedreader"
-      },
-      {
-        "name" : "Framework", 
-        "path" : "/var/www/qx/trunk/qooxdoo/framework",
-        "ignoreClasses" : ["qx.bom.Selector"]
-      },
-      {
-        "name" : "Inspector", 
-        "path" : "/var/www/qx/trunk/qooxdoo/component/inspector"
-      },
-      {
-        "name" : "Playground", 
-        "path" : "/var/www/qx/trunk/qooxdoo/application/playground"
-      },
-      {
-        "name" : "Portal", 
-        "path" : "/var/www/qx/trunk/qooxdoo/application/portal"
-      },
-      {
-        "name" : "Showcase", 
-        "path" : "/var/www/qx/trunk/qooxdoo/application/showcase"
-      },
-      {
-        "name" : "Testrunner", 
-        "path" : "/var/www/qx/trunk/qooxdoo/component/testrunner"
-      }
-    ]
   }
 }
 

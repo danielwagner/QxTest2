@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import util
 import log
-import selenium
+import seleniumserver
 #from lint import Lint
 import testing
 import build
@@ -54,11 +54,11 @@ conf = {
         "seleniumServerOptions" : "-singleWindow",
         "path"                  : "/framework/test",
         "simulationScript"      : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/testrunner/test_testrunner.js",
-        "seleniumVersion"       : "current",
+        "seleniumVersion"       : "1.0.1",
         "browsers" : [
           {
             "browserId"             : "Firefox 3.5",
-            "seleniumVersion"       : "0.9.2",
+            "seleniumVersion"       : "current",
             "seleniumServerOptions" : "-singleWindow",
             "simulationOptions"     : ["include=qx.test.ui"]
           }
@@ -100,7 +100,7 @@ conf = {
   }
 }
 
-myLog = log.Logger({"logFileName" : "dummy.log"})
+#myLog = log.Logger({"logFileName" : "dummy.log"})
 
 
 #sel = selenium.SeleniumServer(testPackageConfig["selenium"])
@@ -142,6 +142,52 @@ simConf = {
 #builder.buildApp("Portal")
 #builder.buildAll()
 
-tr = testing.TestRun(conf)
-tr.runPackage()
+#tr = testing.TestRun(conf)
+#tr.runPackage()
 
+htmlContent = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>qooxdoo Test Report</title><style type="text/css">
+body{font-family:Arial,sans-serif}h1{font-size:18px}h1,h2,h3,td,p{padding:8px}h1,h2,h3,td,p,.testResult h3{margin:0}h2{font-size:16px}h3{font-size:14px}.jump{border-collapse:collapse;margin-bottom:25px}.jump td,.jump th{border:1px solid black}.jump th{background:black;color:white}.jump th,td,p{font-size:12px}.jump th,.qxappender .type-array,.qxappender .type-map,.qxappender .type-class,.qxappender .type-instance,.qxappender .type-stringify,.totalerrors,.testResult h3{font-weight:bold}.qxappender{font:11px consolas,"bitstream vera sans mono","courier new",monospace}.qxappender .level-debug{background:white}.qxappender .level-info{background:#deedfa}.qxappender .level-warn{background:#fff7d5}.qxappender .level-error{background:#ffe2d5}.qxappender .level-user{background:#e3efe9}.qxappender .type-string{color:black}.qxappender .type-string,.qxappender .type-number,.qxappender .type-boolean{font-weight:normal}.qxappender .type-number{color:#155791}.qxappender .type-boolean{color:#15bc91}.qxappender .type-array,.qxappender .type-map{color:#cc3e8a}.qxappender .type-key,.qxappender .type-instance,.qxappender .type-stringify{color:#565656}.qxappender .type-key{font-style:italic}.qxappender .type-class{color:#5f3e8a}.qxappender .noerror{background:#a9ff93}.testResult,#sessionlog{font:11px "consolas","courier new",monospace}.testResult{background:lime;padding-top:4px}.testResult,.level-error,.level-warn,.level-info,.level-debug{margin:4px}.testResult h3{font-size:11px;color:#134275;padding-left:4px}.failure,.error{background:#fef4f4;border-left:3px solid #9d1111}.success{background:#faffed;border-left:3px solid #deff83}
+</style></head><body>
+    <table class="jump">
+    <tr>
+    <th>App under test</th>
+    <th>Browser</th>
+    <th>Test host</th>
+    <th>Date</th>
+    <th>Test duration</th>    
+    <th>Test result</th>
+    </tr><tr><td><a href="#t_1268994600247">Portal</a></td><td>Firefox 3.6 on Linux</td><td>127.0.0.1</td><td>2010-03-19 11:30:00</td><td>0 minutes 19 seconds.</td><td style="align:center; background-color: #00FF00">0 warnings/errors</td></tr></table><div id="t_1268994600247">  <h1>Portal results from 2010-03-19 11:30:00</h1>
+  <p>Application under test: <a href="http://172.17.12.142/qx/trunk/qooxdoo/application/portal/build/index.html">http://172.17.12.142/qx/trunk/qooxdoo/application/portal/build/index.html</a></p>
+  <p>Platform: Linux</p>
+  <p>User agent: Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.2) Gecko/20100115 Firefox/3.6</p>
+  <div class="qxappender"><div class="level-info"><p>debug:Load runtime: 117ms </p></div></div>
+  <div class="qxappender"><div class="level-info"><p>debug:Main runtime: 15ms </p></div></div>
+  <div class="qxappender"><div class="level-info"><p>debug:Finalize runtime: 0ms </p></div></div>
+  <div class="qxappender"><div class="level-info"><p>Portal ended with warnings or errors: 0</p></div></div>
+  <div class="qxappender"><div class="level-info"><p>Test run finished in: 0 minutes 19 seconds.</p></div></div>
+</div><p class="totalerrors">Total errors in report: 0</p>
+  </body></html>"""
+
+import smtplib
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
+msg = MIMEMultipart()
+mailFrom = "testing@qooxdoo.org"
+mailTo = "daniel.wagner@1und1.de"
+msg['From'] = mailFrom
+msg['To'] = mailTo
+msg['Subject'] = "Mail test"
+msg.preamble = 'Test Results'
+
+msgText = MIMEText(htmlContent, 'html')
+msg.attach(msgText)
+
+mailServer = smtplib.SMTP("smtp.1und1.de", 587)  
+mailServer.ehlo()
+mailServer.starttls()
+mailServer.ehlo()
+mailServer.sendmail(mailFrom, mailTo, msg.as_string())
+mailServer.close()
+    
