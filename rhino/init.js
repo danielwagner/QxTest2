@@ -26,8 +26,29 @@ simulation.loader.loadClass("simulation.util.Config", basePath);
 simulation.loader.loadClass("simulation.QxSimulation", basePath);
 
 var config = new simulation.util.Config(args, defaults, required);
-var sim = new simulation.QxSimulation(config);
-sim.__logger.info("yoohoo");
+
+(function() {
+  var sim = new simulation.QxSimulation(config);
+  
+  started = sim.startSession();
+  if (!started) {
+    print("Session not started!");
+    return;
+  }
+  
+  sim.selenium.waitForCondition(simulation.QxSimulation.ISQXAPPREADY, "60000");
+  print("QX App ready");
+  
+  sim.addRingBuffer();
+  sim.addRingBufferGetter();
+  
+  print("Added RingBuffer");
+  
+  sim.addGlobalErrorHandler();
+  sim.addGlobalErrorGetter();
+  
+})();
+
 
 //simulation.loader.loadClass("simulation.test.TestSuite", basePath);
 //simulation.loader.loadClass("simulation.test.TestCase", basePath);
