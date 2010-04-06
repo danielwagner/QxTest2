@@ -87,7 +87,7 @@ simulation.Simulation2 = function(baseConf, args)
    * @param errors {Integer} The new error count
    * @return {void}
    */
-  setTotalErrorsLogged = function(errors) 
+  this.setTotalErrorsLogged = function(errors) 
   {
     __totalErrorsLogged = errors;
   };
@@ -99,7 +99,7 @@ simulation.Simulation2 = function(baseConf, args)
    * @param warnings {Integer} The new warning count
    * @return {void}
    */
-  setTotalWarningsLogged = function(warnings) 
+  this.setTotalWarningsLogged = function(warnings) 
   {
     __totalWarningsLogged = warnings;
   };
@@ -283,7 +283,7 @@ simulation.Simulation2.prototype.incrementTotalErrorsLogged = function()
 {
   var oldCount = this.getTotalErrorsLogged();
   var newCount = oldCount + 1;
-  setTotalErrorsLogged(newCount);  
+  this.setTotalErrorsLogged(newCount);  
 };
 
 /**
@@ -295,7 +295,7 @@ simulation.Simulation2.prototype.incrementTotalWarningsLogged = function()
 {
   var oldCount = this.getTotalWarningsLogged();
   var newCount = oldCount + 1;
-  setTotalWarningsLogged(newCount);  
+  this.setTotalWarningsLogged(newCount);  
 };
 
 /**
@@ -370,7 +370,7 @@ simulation.Simulation2.prototype.setupEnvironment = function()
  */
 simulation.Simulation2.prototype.qxOpen = function(uri)
 {
-  openUri = uri || this.getConfigSetting("autHost") + "" + this.getConfigSetting("autPath");
+  var openUri = uri || this.getConfigSetting("autHost") + "" + this.getConfigSetting("autPath");
   this.__sel.open(openUri);
   this.setupEnvironment();
 };
@@ -1031,7 +1031,6 @@ simulation.Simulation2.prototype.addRingBuffer = function()
   var rb = "new selenium.qxStoredVars['autWindow'].qx.log.appender.RingBuffer()";
   this.storeEval(rb, "ringBuffer");  
   this.getEval("selenium.qxStoredVars['autWindow'].qx.log.Logger.register(selenium.qxStoredVars['ringBuffer'])", "Registering log appender");
-  //this.getEval("selenium.qxStoredVars['ringBuffer'].clearHistory()", "Clearing log history");
 };
 
 /**
@@ -1073,7 +1072,7 @@ simulation.Simulation2.prototype.logRingBufferEntries = function()
 {
   var debugLog = this.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.getRingBufferEntries()", "Retrieving log messages");
   debugLog = String(debugLog);
-  debugLogArray = debugLog.split("|");
+  var debugLogArray = debugLog.split("|");
   
   for (var i=0,l=debugLogArray.length; i<l; i++) {
     this.info(debugLogArray[i]);
@@ -1161,7 +1160,7 @@ simulation.Simulation2.prototype.addGlobalErrorHandler = function(win)
  */
 simulation.Simulation2.prototype.logGlobalErrors = function(win)
 {
-  targetWin = win || "";
+  var targetWin = win || "";
   var exceptions = this.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.getGlobalErrors(" + targetWin + ")", "Retrieving global error store");
   var ex = String(exceptions);
   if (ex.length > 0) {
