@@ -17,22 +17,20 @@
 
 ************************************************************************ */
 
-simulation.test.TestCase = function(baseConf, args)
+simulation.test.TestCase = function(config)
 {
-  var that = new simulation.Simulation2(baseConf, args);
+  var that = new simulation.QxSimulation(config);
   
   var sessionStarted = that.startSession();
   if (!sessionStarted) {
     throw new Error("Couldn't start test session");
   }
 
-  var isAppReady = that.waitForCondition(simulation.Simulation2.ISQXAPPREADY, 60000, 
-                                          "Waiting for qooxdoo application");
-
-  if (!isAppReady) {
-    that.testFailed = true;
-    that.stop();
-    return;
+  try {
+    that.selenium.waitForCondition(simulation.QxSimulation.ISQXAPPREADY, 60000);
+  } catch(ex) {
+    that.selenium.stop();
+    throw ex;
   }
   
     
@@ -68,7 +66,7 @@ simulation.test.TestCase = function(baseConf, args)
         
       }
     }
-    this.stop();
+    this.selenium.stop();
   };
   
   return that;

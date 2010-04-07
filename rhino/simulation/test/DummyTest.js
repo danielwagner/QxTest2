@@ -1,6 +1,6 @@
-simulation.test.DummyTest = function(baseConf, args)
+simulation.foo.DummyTest = function(config)
 {
-  var that = new simulation.test.TestCase(baseConf, args);
+  var that = new simulation.QxSimulation(config);
   
   that.setUp = function() {
     this.debug("Setting up a test from test.DummyTest");

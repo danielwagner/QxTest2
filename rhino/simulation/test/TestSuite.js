@@ -17,7 +17,9 @@
 
 ************************************************************************ */
 
-simulation.test.TestSuite = function(testClassList, baseDir, baseConf, args) {
+simulation.test.TestSuite = function(config) {  
+  var testClassList = config.getSetting("testClasses");
+  var basePath = config.getSetting("testClassPath");
   this.testClasses = [];
 
   function getObjectByNamespace(nsArr) {
@@ -29,12 +31,12 @@ simulation.test.TestSuite = function(testClassList, baseDir, baseConf, args) {
   }
   
   for (var i=0,l=testClassList.length; i<l; i++) {
-    simulation.loader.loadClass(testClassList[i], baseDir);
-    
+    simulation.loader.loadClass(testClassList[i], basePath);
+        
     // Create the test class instance
     var testNamespace = testClassList[i].split(".");
     var testClass = getObjectByNamespace(testNamespace);
-    var testInst = new testClass(baseConf, args);
+    var testInst = new testClass(config);
     this.testClasses.push(testInst);
   }
   
@@ -42,5 +44,5 @@ simulation.test.TestSuite = function(testClassList, baseDir, baseConf, args) {
     for (var i=0,l=this.testClasses.length; i<l; i++) {
       this.testClasses[i].runTests();
     }
-  };
+  };  
 };

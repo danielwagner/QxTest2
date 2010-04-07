@@ -3,29 +3,27 @@ var required = ['selServer', 'selPort', 'testBrowser', 'autHost', 'autPath'];
 
 // Some default settings.
 var defaults = {
-  debug : false,
-  autName : "Unnamed Application",
-  selServer : 'localhost',
-  selPort : 4444,
-  stepSpeed : "250",
-  globalTimeout : 120000,
-  disposerDebug : false,
-  applicationLog : true
+  autName : "Unnamed Application"
 };
+
+
 
 var args = arguments ? arguments : "";
 var basePath = "";
+
 for (var i=0; i<args.length; i++) {
-  if (args[i].indexOf('basePath') >= 0) {
-    basePath = args[i].substr(args[i].indexOf('basePath=') + 9);
+  keyVal = args[i].split("=");
+  if (keyVal[0] == "basePath") {
+    basePath = keyVal[1];    
   }
 }
 
 load([basePath + "/simulation/Loader.js"]);
 simulation.loader.loadClass("simulation.util.Config", basePath);
+
 simulation.loader.loadClass("simulation.QxSimulation", basePath);
 
-var config = new simulation.util.Config(args, defaults, required);
+var config = new simulation.util.Config(args, required, defaults);
 
 (function() {
   var sim = new simulation.QxSimulation(config);
@@ -37,16 +35,28 @@ var config = new simulation.util.Config(args, defaults, required);
   }
   
   sim.selenium.waitForCondition(simulation.QxSimulation.ISQXAPPREADY, "60000");
-  print("QX App ready");
   
   sim.addRingBuffer();
   sim.addRingBufferGetter();
-  
-  print("Added RingBuffer");
-  
+    
   sim.addGlobalErrorHandler();
   sim.addGlobalErrorGetter();
+  /*
+  var test = sim.selenium.getEval("try {selenium.qxStoredVars['autWindow'].qx.core.Init.blarg();} catch(ex) {}");
+  print(String(test));  
+  var gErrs = sim.getGlobalErrors();
+  print("global Errors: " + gErrs);
+  */
   
+  //Packages.java.lang.Thread.sleep(2000000);
+  /*
+  sim.selenium.getEval("try { throw new Error('Some dumb error'); } catch(ex) {}");
+  
+  var gErrors = String(sim.getGlobalErrors());
+  print("Global Errors: " + gErrors);
+  sim.clearGlobalErrorStore();
+  */
+  sim.selenium.stop();
 })();
 
 

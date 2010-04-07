@@ -1,7 +1,11 @@
-simulation.util.Config = function(args, defaultMap, requiredList)
+simulation.util.Config = function(args, requiredList, defaultMap)
 {
-  var defaults = defaultMap ? defaultMap : {};
-  var required = requiredList ? requiredList : [];
+  var required = requiredList || ['selServer', 'selPort', 'testBrowser', 'autHost', 'autPath'];
+  var defaults = defaultMap || {};
+  
+  function trim(stringToTrim) {
+    return stringToTrim.replace(/^\s+|\s+$/g,"");
+  }
   
   function getConfigFromArgs(args)
   {
@@ -9,15 +13,31 @@ simulation.util.Config = function(args, defaultMap, requiredList)
     for (var i in args) {
       if (args[i].indexOf("=") >0) {
         var tempArr = args[i].split("=");
-        if (tempArr[1] == "true") {
-          conf[tempArr[0]] = true;
+        var key = tempArr[0];
+        var value = tempArr[1];
+        
+        // Value is Boolean
+        if (value == "true") {
+          conf[key] = true;
         }
-        else if (tempArr[1] == "false") {
-          conf[tempArr[0]] = false;
+        else if (value == "false") {
+          conf[key] = false;
         }
-        else {
-          conf[tempArr[0]] = tempArr[1]; 
+        
+        // Value is Array
+        if (value[0] == "[" && value[value.length - 1] == "]" ) {          
+          conf[key] = [];
+          var valuesStr = value.substr(1, value.length - 2);
+          var valuesArray = valuesStr.split(",");
+          for (var i=0; i<valuesArray.length; i++) {
+            conf[key].push(trim(valuesArray[i]));
+          }
         }
+        
+        else {          
+          conf[key] = value; 
+        }
+      
       }
     }
     return conf;

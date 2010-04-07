@@ -35,7 +35,7 @@ simulation.QxSimulation.prototype.__getLogger = function()
     // Determine the name for the log file.
     var logFile = this.__config.getSetting("logFile", false);
     if (!logFile) {
-      logFile = this.__config.getSetting("autName") + "_" + this.startDate.getTime() + ".log"; 
+      logFile = this.__config.getSetting("autName", "qxSelenium") + "_" + this.startDate.getTime() + ".log"; 
     }
     
     simulation.loader.loadClass("simulation.logger.File", this.__config.getSetting("basePath"), "");
@@ -55,10 +55,6 @@ simulation.QxSimulation.prototype.__getLogger = function()
  */
 simulation.QxSimulation.prototype.startSession = function()
 {
-  if (this.__config.getSetting("debug")) {
-    this.debug("Starting " + this.__config.getSetting("autName") + " session with browser " + this.__config.getSetting("testBrowser"));
-  }
-  
   // Create QxSelenium instance.
   try {
     this.selenium = new QxSelenium(this.__config.getSetting("selServer"),
@@ -72,9 +68,9 @@ simulation.QxSimulation.prototype.startSession = function()
 
   try {
     this.selenium.start();
-    this.selenium.setTimeout(this.__config.getSetting("globalTimeout"));    
+    this.selenium.setTimeout(this.__config.getSetting("globalTimeout", 120000));    
     this.selenium.open(this.__config.getSetting("autHost") + "" + this.__config.getSetting("autPath"));
-    this.selenium.setSpeed(this.__config.getSetting("stepSpeed"));
+    this.selenium.setSpeed(this.__config.getSetting("stepSpeed", "250"));
     this.setupEnvironment();
   }
   catch (ex) {
