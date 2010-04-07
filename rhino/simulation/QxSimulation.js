@@ -96,7 +96,7 @@ simulation.QxSimulation.prototype.setupEnvironment = function()
    */
   this.selenium.getEval('selenium.qxStoredVars = {}');    
   this.storeEval('selenium.browserbot.getCurrentWindow()', 'autWindow');
-
+  
   this.prepareNameSpace();
   this.addSanitizer();
 };
@@ -189,7 +189,7 @@ simulation.QxSimulation.prototype.storeEval = function(code, keyName)
     throw new Error("No key name specified for storeEval()");
   }
 
-  this.selenium.getEval('selenium.qxStoredVars["' + keyName + '"] = ' + code);
+  this.selenium.getEval('selenium.qxStoredVars["' + keyName + '"] = ' + String(code));
 };
 
 /**
@@ -226,11 +226,12 @@ simulation.QxSimulation.prototype.addOwnFunction = function(funcName, func)
  * 
  * @return {void}
  */
-simulation.QxSimulation.prototype.addRingBuffer = function()
+simulation.QxSimulation.prototype.addRingBuffer = function(win)
 {
-  var rb = "new selenium.qxStoredVars['autWindow'].qx.log.appender.RingBuffer()";
+  var qxWin = win || "selenium.qxStoredVars['autWindow']";
+  var rb = "new " + qxWin + ".qx.log.appender.RingBuffer()";
   this.storeEval(rb, "ringBuffer");  
-  this.selenium.getEval("selenium.qxStoredVars['autWindow'].qx.log.Logger.register(selenium.qxStoredVars['ringBuffer'])");
+  var ret = this.selenium.getEval(qxWin + ".qx.log.Logger.register(selenium.qxStoredVars['ringBuffer'])");
 };
 
 /**
@@ -241,12 +242,13 @@ simulation.QxSimulation.prototype.addRingBuffer = function()
  */
 simulation.QxSimulation.prototype.addRingBufferGetter = function()
 {
-  var getRingBufferEntries = function() {
+  var getRingBufferEntries = function(autWin) {
+    var targetWin = autWin || selenium.qxStoredVars['autWindow'];
     var entries = selenium.qxStoredVars["ringBuffer"].getAllLogEvents();
     var entryArray = [];
     for (var i=0,l=entries.length; i<l; i++) {
       try {
-      var entry = selenium.qxStoredVars['autWindow'].qx.log.appender.Util.toText(entries[i]);
+      var entry = targetWin.qx.log.appender.Util.toText(entries[i]);
       entryArray.push(entry);
       } catch(ex) {
         var entry = entries[i].level + ":";
@@ -276,12 +278,11 @@ simulation.QxSimulation.prototype.addRingBufferGetter = function()
 simulation.QxSimulation.prototype.addGlobalErrorHandler = function(win)
 {
   var qxWin = win || "selenium.qxStoredVars['autWindow']";
-  this.prepareNameSpace(qxWin);
   this.selenium.getEval(qxWin + ".qx.Simulation.errorStore = [];");
   
   var addHandler = function(autWin)
   {
-    var targetWin = autWin || selenium.qxStoredVars['autWindow']; 
+    var targetWin = autWin || selenium.qxStoredVars['autWindow'];
     targetWin.qx.event.GlobalError.setErrorHandler(function(ex) {
       var exString = "";
       if (ex instanceof targetWin.qx.core.WindowError) {
@@ -322,4 +323,24 @@ simulation.QxSimulation.prototype.addGlobalErrorGetter = function(win)
      return exString;     
   };
   this.addOwnFunction("getGlobalErrors", globalErr);
+};
+
+simulation.QxSimulation.prototype.getGlobalErrors = function(win)
+{
+  var qxWin = win || "selenium.qxStoredVars['autWindow']";
+  var exceptions = this.selenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.getGlobalErrors(" + qxWin + ")");
+  return String(exceptions);
+};
+
+/**
+ * Empties the given window's global exception store.
+ *
+ * @param win {String} The target window. Must evaluate to a JavaScript Window 
+ * object. Default: The AUT's window.
+ * @return {void}
+ */
+simulation.QxSimulation.prototype.clearGlobalErrorStore = function(win)
+{
+  var targetWin = win || "selenium.qxStoredVars['autWindow']";
+  this.selenium.getEval(targetWin + ".qx.Simulation.errorStore = [];");
 };
