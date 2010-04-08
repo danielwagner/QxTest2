@@ -17,7 +17,8 @@
 
 ************************************************************************ */
 
-simulation.test.TestSuite = function(config) {  
+simulation.test.TestSuite = function(config) 
+{
   var testClassList = config.getSetting("testClasses");
   var basePath = config.getSetting("testClassPath");
   this.testClasses = [];
@@ -37,12 +38,19 @@ simulation.test.TestSuite = function(config) {
     var testNamespace = testClassList[i].split(".");
     var testClass = getObjectByNamespace(testNamespace);
     var testInst = new testClass(config);
+    testInst.classname = testClassList[i];
     this.testClasses.push(testInst);
   }
   
   this.runTests = function() {
     for (var i=0,l=this.testClasses.length; i<l; i++) {
-      this.testClasses[i].runTests();
+      var testClass = this.testClasses[i];
+      try {
+        testClass.runTests();
+      }
+      catch(ex) {
+        print("Unexpected error while running " + testClass.classname + ": " + ex.javaException);
+      }
     }
   };  
 };

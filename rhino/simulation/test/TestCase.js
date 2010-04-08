@@ -21,41 +21,58 @@ simulation.test.TestCase = function(config)
 {
   var that = new simulation.QxSimulation(config);
   
-  //var sessionStarted = that.startSession();  
-    
-  that.nameSpace = "";
-  that.runTests = function() {
-    this.startSession();
+  that._testCount = 0;
+  that._testsFailed = 0;
+  that._getTestList = function()
+  {
+    var testList = [];
     for (prop in this) {
       if (prop != "testFailed" && prop.indexOf("test") == 0) {
-        var testFullName = this.nameSpace + "." + prop;
-        
-        if (this.setUp) {
-          try {
-            this.setUp();
-          } catch(ex) {
-            this.error("Error setting up " + testFullName + ": " + ex);
-            continue;
-          }
-        }
-        
-        try {
-          this[prop]();
-          this.info("Test " + testFullName + " successful");
-        } catch(ex) {
-          this.error("Test " + testFullName + " failed: " + ex);
-        }
-        
-        if (this.tearDown) {
-          try {
-            this.tearDown();
-          } catch(ex) {
-            this.error("Error tearing down " + testFullName + ": " + ex);
-          }
-        } 
-        
+        this._testCount++;
+        testList.push(prop);
       }
     }
+    return testList;
+  };
+  
+  that.runTests = function() {    
+    var testList = this._getTestList();
+    this.info("Running " + this._testCount + " tests from " + this.classname);
+    
+    this.startSession();
+        
+    for (var i=0,l=testList.length; i<l; i++) {
+      var testFunc = testList[i];
+      var testFullName = this.classname + "." + testFunc;
+        
+      if (this.setUp) {
+        try {
+          this.setUp();
+        } catch(ex) {
+          this._testsFailed++;
+          this.error("Error setting up " + testFullName + ": " + ex);
+          continue;
+        }
+      }
+      
+      try {
+        this[testFunc]();
+        this.info("Test " + testFullName + " successful");
+      } catch(ex) {
+        this._testsFailed++;
+        this.error("Test " + testFullName + " failed: " + ex);
+      }
+      
+      if (this.tearDown) {
+        try {
+          this.tearDown();
+        } catch(ex) {
+          this.error("Error tearing down " + testFullName + ": " + ex);
+        }
+      }
+      
+    }
+    this.info(this._testsFailed + " failed tests out of " + this._testCount + " total");
     qxSelenium.stop();
   };
   
