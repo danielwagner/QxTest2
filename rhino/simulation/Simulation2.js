@@ -262,13 +262,13 @@ simulation.Simulation2 = function(baseConf, args)
     }
     
     //load([__config.simulatorSvn + "/trunk/tool/selenium/simulation/logger/File.js"]);
-    simulation.loader.loadClass("simulation.logger.File", __config.simulatorSvn);
+    simulation.loader.load("simulation.logger.File", __config.simulatorSvn);
     var logPrefix = "qxSimulator_" + this.startDate.getTime();
     this.__logger = new simulation.logger.File(__config.logFile, logPrefix);
   } 
   else if (__config.logger == "console") {
     //load([__config.simulatorSvn + "/trunk/tool/selenium/simulation/logger/Console.js"]);
-    simulation.loader.loadClass("simulation.logger.Console", __config.simulatorSvn);
+    simulation.loader.load("simulation.logger.Console", __config.simulatorSvn);
     this.__logger = new simulation.logger.Console();
   }
 
