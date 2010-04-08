@@ -27,9 +27,9 @@ simulation.test.TestCase = function(config)
   }
 
   try {
-    that.selenium.waitForCondition(simulation.QxSimulation.ISQXAPPREADY, 60000);
+    qxSelenium.waitForCondition(simulation.QxSimulation.ISQXAPPREADY, 60000);
   } catch(ex) {
-    that.selenium.stop();
+    qxSelenium.stop();
     throw ex;
   }
   
@@ -66,7 +66,7 @@ simulation.test.TestCase = function(config)
         
       }
     }
-    this.selenium.stop();
+    qxSelenium.stop();
   };
   
   return that;

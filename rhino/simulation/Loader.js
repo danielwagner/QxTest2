@@ -21,31 +21,27 @@
 simulation = {}; 
 simulation.loader = {};
 var globalObj = this;
-simulation.loader.loadClass = function(className, basePath)
+simulation.loader.load = function(className, basePath)
 {
   nameSpace = className.split(".");
   parent = globalObj;
   var classPath = "";
   // create the namespace object hierarchy
-  for (var i=0,l=nameSpace.length; i<l-1; i++) {
-    if (!parent[nameSpace[i]]) {
-      parent[nameSpace[i]] = {};
+  for (var i=0,l=nameSpace.length; i<l; i++) {
+    var fragment = nameSpace[i];
+    classPath += "/" + fragment;
+    if (!parent[fragment]) {
+      parent[fragment] = {};
+      
+      // if it starts with a capital letter, treat it as a class (file)
+      if (fragment[0] == fragment[0].toUpperCase()) {
+        var classFile = basePath + classPath + ".js";
+        load([classFile]);
+      }
+    
     }
-    classPath += "/" + nameSpace[i];
-    parent = parent[nameSpace[i]];
+    
+    parent = parent[fragment];
   }
-  
-  // load the class
-  var className = nameSpace[nameSpace.length-1];
-  
-  if (parent[className]) {
-    print("Warning: " + className + " is already defined!");
-  }
-  
-  var classFile = basePath + classPath + "/" + className + ".js";
-  load([classFile]);
-  
-  if (!typeof parent[className] === "function") {
-    throw new Error("Couldn't load class " + className);    
-  }
+
 };

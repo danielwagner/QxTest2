@@ -8,11 +8,14 @@ for (var i=0; i<args.length; i++) {
 }
 load([basePath + "/simulation/Loader.js"]);
 
-simulation.loader.loadClass("simulation.util.Config", basePath);
-simulation.loader.loadClass("simulation.QxSimulation", basePath);
-simulation.loader.loadClass("simulation.test.TestCase", basePath);
-simulation.loader.loadClass("simulation.test.TestSuite", basePath);
+simulation.loader.load("simulation.util.Config", basePath);
+simulation.loader.load("simulation.qxselenium.QxSelenium", basePath);
+simulation.loader.load("simulation.QxSimulation", basePath);
+simulation.loader.load("simulation.test.TestCase", basePath);
+simulation.loader.load("simulation.test.TestSuite", basePath);
 
 var config = new simulation.util.Config(args);
+qxSelenium = simulation.qxselenium.QxSelenium.createQxSelenium(config);
+
 var suite = new simulation.test.TestSuite(config);
 suite.runTests();

@@ -1,14 +1,5 @@
 simulation.QxSimulation = function(config)
-{
-  // Basic sanity check: No sense in continuing without QxSelenium.
-  try {
-    importClass(Packages.com.thoughtworks.selenium.QxSelenium);
-  }
-  catch(ex) {
-    throw new Error("Couldn't import QxSelenium class! Make sure the qooxdoo " 
-    + "Selenium user extensions are installed in your Selenium client.\n" + ex);
-  }
-  
+{  
   this.__config = config;
   this.startDate = new Date();
   this.logger = this.__getLogger();
@@ -38,11 +29,11 @@ simulation.QxSimulation.prototype.__getLogger = function()
       logFile = this.__config.getSetting("autName", "qxSelenium") + "_" + this.startDate.getTime() + ".log"; 
     }
     
-    simulation.loader.loadClass("simulation.logger.File", this.__config.getSetting("basePath"), "");
+    simulation.loader.load("simulation.logger.File", this.__config.getSetting("basePath"), "");
     return new simulation.logger.File(logFile);
   } 
   if (logType == "console") {
-    simulation.loader.loadClass("simulation.logger.Console", this.__config.getSetting("basePath"));
+    simulation.loader.load("simulation.logger.Console", this.__config.getSetting("basePath"));
     return new simulation.logger.Console();
   }
 };
@@ -56,8 +47,9 @@ simulation.QxSimulation.prototype.__getLogger = function()
 simulation.QxSimulation.prototype.startSession = function()
 {
   // Create QxSelenium instance.
+  /*
   try {
-    this.selenium = new QxSelenium(this.__config.getSetting("selServer"),
+    qxSelenium = new QxSelenium(this.__config.getSetting("selServer"),
                                    this.__config.getSetting("selPort"),
                                    this.__config.getSetting("testBrowser"),
                                    this.__config.getSetting("autHost"));
@@ -65,12 +57,12 @@ simulation.QxSimulation.prototype.startSession = function()
   catch(ex) {
     throw new Error("Unable to create QxSelenium instance: " + ex);
   }
-
+  */
   try {
-    this.selenium.start();
-    this.selenium.setTimeout(this.__config.getSetting("globalTimeout", 120000));    
-    this.selenium.open(this.__config.getSetting("autHost") + "" + this.__config.getSetting("autPath"));
-    this.selenium.setSpeed(this.__config.getSetting("stepSpeed", "250"));
+    qxSelenium.start();
+    qxSelenium.setTimeout(this.__config.getSetting("globalTimeout", 120000));    
+    qxSelenium.open(this.__config.getSetting("autHost") + "" + this.__config.getSetting("autPath"));
+    qxSelenium.setSpeed(this.__config.getSetting("stepSpeed", "250"));
     this.setupEnvironment();
   }
   catch (ex) {
@@ -90,7 +82,7 @@ simulation.QxSimulation.prototype.setupEnvironment = function()
    * Store the AUT window object to avoid calling 
    * selenium.browserbot.getCurrentWindow() repeatedly.
    */
-  this.selenium.getEval('selenium.qxStoredVars = {}');    
+  qxSelenium.getEval('selenium.qxStoredVars = {}');    
   this.storeEval('selenium.browserbot.getCurrentWindow()', 'autWindow');
   
   this.prepareNameSpace();
@@ -109,9 +101,9 @@ simulation.QxSimulation.prototype.setupEnvironment = function()
 simulation.QxSimulation.prototype.prepareNameSpace = function(win)
 {
   var targetWin = win || 'selenium.qxStoredVars["autWindow"]';
-  var ns = String(this.selenium.getEval(targetWin + '.qx.Simulation'));
+  var ns = String(qxSelenium.getEval(targetWin + '.qx.Simulation'));
   if (ns == "null" || ns == "undefined") {
-    this.selenium.getEval(targetWin + '.qx.Simulation = {};');
+    qxSelenium.getEval(targetWin + '.qx.Simulation = {};');
   }
 };
 
@@ -185,7 +177,7 @@ simulation.QxSimulation.prototype.storeEval = function(code, keyName)
     throw new Error("No key name specified for storeEval()");
   }
 
-  this.selenium.getEval('selenium.qxStoredVars["' + keyName + '"] = ' + String(code));
+  qxSelenium.getEval('selenium.qxStoredVars["' + keyName + '"] = ' + String(code));
 };
 
 /**
@@ -214,7 +206,7 @@ simulation.QxSimulation.prototype.addOwnFunction = function(funcName, func)
   func = func.replace(/\n/,'');
   func = func.replace(/\r/,'');
   
-  this.selenium.getEval('selenium.browserbot.getCurrentWindow().qx.Simulation.' + funcName + ' = ' + func);
+  qxSelenium.getEval('selenium.browserbot.getCurrentWindow().qx.Simulation.' + funcName + ' = ' + func);
 };
 
 /**
@@ -227,7 +219,7 @@ simulation.QxSimulation.prototype.addRingBuffer = function(win)
   var qxWin = win || "selenium.qxStoredVars['autWindow']";
   var rb = "new " + qxWin + ".qx.log.appender.RingBuffer()";
   this.storeEval(rb, "ringBuffer");  
-  var ret = this.selenium.getEval(qxWin + ".qx.log.Logger.register(selenium.qxStoredVars['ringBuffer'])");
+  var ret = qxSelenium.getEval(qxWin + ".qx.log.Logger.register(selenium.qxStoredVars['ringBuffer'])");
 };
 
 /**
@@ -274,7 +266,7 @@ simulation.QxSimulation.prototype.addRingBufferGetter = function()
 simulation.QxSimulation.prototype.addGlobalErrorHandler = function(win)
 {
   var qxWin = win || "selenium.qxStoredVars['autWindow']";
-  this.selenium.getEval(qxWin + ".qx.Simulation.errorStore = [];");
+  qxSelenium.getEval(qxWin + ".qx.Simulation.errorStore = [];");
   
   var addHandler = function(autWin)
   {
@@ -305,7 +297,7 @@ simulation.QxSimulation.prototype.addGlobalErrorHandler = function(win)
   };
   
   this.addOwnFunction("addGlobalErrorHandler", addHandler);
-  this.selenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.addGlobalErrorHandler(" + qxWin + ");");  
+  qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.addGlobalErrorHandler(" + qxWin + ");");  
 };
 
 simulation.QxSimulation.prototype.addGlobalErrorGetter = function(win)
@@ -324,7 +316,7 @@ simulation.QxSimulation.prototype.addGlobalErrorGetter = function(win)
 simulation.QxSimulation.prototype.getGlobalErrors = function(win)
 {
   var qxWin = win || "selenium.qxStoredVars['autWindow']";
-  var exceptions = this.selenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.getGlobalErrors(" + qxWin + ")");
+  var exceptions = qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.getGlobalErrors(" + qxWin + ")");
   return String(exceptions);
 };
 
@@ -338,5 +330,5 @@ simulation.QxSimulation.prototype.getGlobalErrors = function(win)
 simulation.QxSimulation.prototype.clearGlobalErrorStore = function(win)
 {
   var targetWin = win || "selenium.qxStoredVars['autWindow']";
-  this.selenium.getEval(targetWin + ".qx.Simulation.errorStore = [];");
+  qxSelenium.getEval(targetWin + ".qx.Simulation.errorStore = [];");
 };

@@ -31,7 +31,7 @@ simulation.test.TestSuite = function(config) {
   }
   
   for (var i=0,l=testClassList.length; i<l; i++) {
-    simulation.loader.loadClass(testClassList[i], basePath);
+    simulation.loader.load(testClassList[i], basePath);
         
     // Create the test class instance
     var testNamespace = testClassList[i].split(".");
