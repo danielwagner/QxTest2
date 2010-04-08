@@ -229,9 +229,10 @@ simulation.QxSimulation = function(config)
    */
   that.runCommand = function(command, params, description)
   {
+    var result = null;
     var desc = description || "Running QxSelenium command " + command;
     try {
-      qxSelenium[command].apply(qxSelenium, params);
+      result = qxSelenium[command].apply(qxSelenium, params);
     }
     catch(ex) {
       if (ex.javaException) {
@@ -239,6 +240,7 @@ simulation.QxSimulation = function(config)
       }
       this.error("ERROR " + description);
     }
+    return result;
   };
   
   
