@@ -40,24 +40,15 @@ simulation.QxSimulationBase.prototype.__getLogger = function()
 
 
 /**
- * Start the Selenium session and set some basic options.
- * 
- * @return {Boolean} true if the Selenium session started without errors
+ * Start the Selenium session, load the AUT and set some basic options.
  */
 simulation.QxSimulationBase.prototype.startSession = function()
 {
-  try {
-    qxSelenium.start();
-    qxSelenium.setTimeout(this.__config.getSetting("globalTimeout", 120000));    
-    qxSelenium.open(this.__config.getSetting("autHost") + "" + this.__config.getSetting("autPath"));
-    qxSelenium.setSpeed(this.__config.getSetting("stepSpeed", "250"));
-    this.setupEnvironment();
-  }
-  catch (ex) {
-    throw new Error("ERROR: Unable to start test session: " + ex);
-    return false;
-  }
-  return true;
+  qxSelenium.start();
+  qxSelenium.setTimeout(this.__config.getSetting("globalTimeout", 120000));    
+  qxSelenium.open(this.__config.getSetting("autHost") + "" + this.__config.getSetting("autPath"));
+  qxSelenium.setSpeed(this.__config.getSetting("stepSpeed", "250"));
+  this.setupEnvironment();
 };
 
 /**

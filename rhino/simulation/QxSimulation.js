@@ -1,9 +1,35 @@
 simulation.QxSimulation = function(config)
 {
   var that = new simulation.QxSimulationBase(config);
-  
+  that.testFailed = false;
   that.errorCount = 0;
   that.warningCount = 0;
+  
+  that.__startSession = that.startSession;
+  
+  /**
+   * Starts the QxSelenium session. Also makes the necessary preparations to 
+   * enable global error logging and/or application log extraction if these
+   * options are configured.
+   */
+  that.startSession = function()
+  {
+    this.__startSession();
+    
+    this.runCommand("waitForCondition", 
+                    [simulation.QxSimulationBase.ISQXAPPREADY, 30000], 
+                    "Waiting for qooxdoo application");
+    
+    if (this.__config.getSetting("globalErrorLogging", false)) {
+      this.addGlobalErrorHandler();
+      this.addGlobalErrorGetter();        
+    }
+    
+    if (this.__config.getSetting("applicationLog", false) || this.__config.getSetting("disposerDebug", false)) {
+      this.addRingBuffer();
+      this.addRingBufferGetter();
+    }
+  };
    
   /**
    * Formats a message according to the error level, then writes it to the local 
@@ -132,10 +158,13 @@ simulation.QxSimulation = function(config)
       if (parseInt(disposerDebugLevel, 10) > 0 ) {
         //this.logDisposerDebug();
         this.qxShutdown();
-      } else { print("debug level too low"); }
+      } 
+      else { 
+        this.warn("Dispose logging is active but the application's disposer debug level is 0!"); 
+      }
     }
     
-    if (this.__config.getSetting("applicationLog", false)) {
+    if (this.__config.getSetting("applicationLog", false) || this.__config.getSetting("disposerDebug", false)) {
       this.logRingBufferEntries();
     }
     

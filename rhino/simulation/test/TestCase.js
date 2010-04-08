@@ -21,21 +21,11 @@ simulation.test.TestCase = function(config)
 {
   var that = new simulation.QxSimulation(config);
   
-  var sessionStarted = that.startSession();
-  if (!sessionStarted) {
-    throw new Error("Couldn't start test session");
-  }
-
-  try {
-    qxSelenium.waitForCondition(simulation.QxSimulation.ISQXAPPREADY, 60000);
-  } catch(ex) {
-    qxSelenium.stop();
-    throw ex;
-  }
-  
+  //var sessionStarted = that.startSession();  
     
   that.nameSpace = "";
   that.runTests = function() {
+    this.startSession();
     for (prop in this) {
       if (prop != "testFailed" && prop.indexOf("test") == 0) {
         var testFullName = this.nameSpace + "." + prop;
