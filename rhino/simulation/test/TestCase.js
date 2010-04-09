@@ -17,6 +17,8 @@
 
 ************************************************************************ */
 
+simulation.loader.require(["simulation.QxSimulation"]);
+
 simulation.test.TestCase = function(config)
 {
   var that = new simulation.QxSimulation(config);

@@ -22,21 +22,13 @@ simulation.test.TestSuite = function(config)
   var testClassList = config.getSetting("testClasses");
   var basePath = config.getSetting("testClassPath");
   this.testClasses = [];
-
-  function getObjectByNamespace(nsArr) {
-    var obj = this;
-    for (var i=0; i < nsArr.length; i++) {
-      obj = obj[nsArr[i]];
-    }
-    return obj;
-  }
   
   for (var i=0,l=testClassList.length; i<l; i++) {
     simulation.loader.load(testClassList[i], basePath);
         
     // Create the test class instance
-    var testNamespace = testClassList[i].split(".");
-    var testClass = getObjectByNamespace(testNamespace);
+    var testClassArray = testClassList[i].split(".");
+    var testClass = simulation.loader.getObjectByName(testClassArray);
     var testInst = new testClass(config);
     testInst.classname = testClassList[i];
     this.testClasses.push(testInst);

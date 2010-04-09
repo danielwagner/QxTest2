@@ -45,3 +45,29 @@ simulation.loader.load = function(className, basePath)
   }
 
 };
+
+simulation.loader.getObjectByName = function(nsArr)
+{
+  var obj = globalObj;
+  for (var i=0; i < nsArr.length; i++) {
+    obj = obj[nsArr[i]];
+  }
+  return obj;
+};
+
+simulation.loader.require = function(classNames, basePath)
+{
+  var basePath = basePath || globalObj.basePath; 
+  for (var i=0,l=classNames.length; i<l; i++) { 
+    var className = classNames[i];    
+    
+    try {
+      if (!simulation.loader.getObjectByName(className.split(".")) ) {
+        simulation.loader.load(className, basePath);
+      }
+    }
+    catch(ex) {
+      simulation.loader.load(className, basePath);
+    }    
+  }
+};
