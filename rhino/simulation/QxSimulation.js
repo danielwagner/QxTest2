@@ -270,6 +270,9 @@ simulation.QxSimulation = function(config)
       if (ex.javaException) {
         description = description + " Java Exception was: " + ex.javaException;
       }
+      if (ex.rhinoException) {
+        description = description + " Rhino Exception was: " + ex.rhinoException;
+      }
       this.error("ERROR " + description);
     }
     return result;
