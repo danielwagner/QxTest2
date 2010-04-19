@@ -216,6 +216,17 @@ simulation.QxSimulation = function(config)
     }
   };  
   
+
+  /**
+   * Pause script execution for a given amount of time.
+   * 
+   * @param interval {Integer} Time (in milliseconds) to wait.
+   */
+  that.wait = function(interval)
+  {
+    Packages.java.lang.Thread.sleep(interval);
+  };
+  
   
   /**
    * Shuts down the qooxdoo application. Can be used for disposer debug logging.
