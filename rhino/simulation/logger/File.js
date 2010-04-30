@@ -35,7 +35,7 @@ simulation.logger.File = function(filePath, prefix)
     var lvl = level ? level : "debug";
   
     var logFile = this.__getLogFile(this.LOGFILEPATH);
-    logFile.write(this.PREFIX + ': ' + msg);
+    logFile.write(this.PREFIX + " " + msg);
     logFile.newLine();
     logFile.close();
   };
