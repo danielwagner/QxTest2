@@ -27,19 +27,16 @@ for (var i=0; i<args.length; i++) {
 }
 load([basePath + "/simulation/Loader.js"]);
 
-simulation.loader.load("simulation.util.Config", basePath);
-simulation.loader.load("simulation.qxselenium.QxSelenium", basePath);
-simulation.loader.load("simulation.QxSimulationBase", basePath);
-simulation.loader.load("simulation.QxSimulation", basePath);
-
+simulation.loader.require(["simulation.util.Config", "simulation.qxselenium.QxSelenium", "simulation.QxSimulation"]);
 var config = new simulation.util.Config(args);
 qxSelenium = simulation.qxselenium.QxSelenium.createQxSelenium(config);
 
-var sim = new simulation.QxSimulation(config);
-sim.startSession();
-sim.logEnvironment();
-sim.logUserAgent();
-sim.runCommand("qxClick", ["noLocator"], "bum click");
-sim.logResults();
-sim.logDuration();
-qxSelenium.stop();
+simulation.loader.require(config.getSetting("testClasses"),config.getSetting("testClassPath"));
+
+var testClassList = config.getSetting("testClasses");
+for (var i=0,l=testClassList.length; i<l; i++) {
+  var testClassNs = testClassList[i].split(".");
+  var testClass = simulation.loader.getObjectByName(testClassNs);
+  var sim = new testClass(config);
+  sim.main();
+}
