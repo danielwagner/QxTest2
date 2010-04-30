@@ -17,7 +17,7 @@
 
 ************************************************************************ */
 
-simulation.test.TestSuite = function(config) 
+simulation.test.TestSuite = function(config, logger) 
 {
   var testClassList = config.getSetting("testClasses");
   var basePath = config.getSetting("testClassPath");
@@ -29,7 +29,7 @@ simulation.test.TestSuite = function(config)
     // Create the test class instance
     var testClassArray = testClassList[i].split(".");
     var testClass = simulation.loader.getObjectByName(testClassArray);
-    var testInst = new testClass(config);
+    var testInst = new testClass(config, logger);
     testInst.classname = testClassList[i];
     this.testClasses.push(testInst);
   }

@@ -19,9 +19,9 @@
 
 simulation.loader.require(["simulation.QxSimulationBase"]);
 
-simulation.QxSimulation = function(config)
+simulation.QxSimulation = function(config, logger)
 {
-  var that = new simulation.QxSimulationBase(config);
+  var that = new simulation.QxSimulationBase(config, logger);
   that.testFailed = false;
   that.errorCount = 0;
   that.warningCount = 0;
@@ -261,7 +261,7 @@ simulation.QxSimulation = function(config)
    */
   that.runCommand = function(command, params, description)
   {
-    var result = null;
+    var result = null;    
     var desc = description || "Running QxSelenium command " + command;
     try {
       result = qxSelenium[command].apply(qxSelenium, params);

@@ -17,11 +17,11 @@
 
 ************************************************************************ */
 
-simulation.QxSimulationBase = function(config)
+simulation.QxSimulationBase = function(config, logger)
 {  
   this.__config = config;
   this.startDate = new Date();
-  this.logger = this.__getLogger();
+  this.logger = logger || this.__getLogger();
   
   
   /*
@@ -40,21 +40,8 @@ simulation.QxSimulationBase = function(config)
 simulation.QxSimulationBase.prototype.__getLogger = function()
 {
   // Create a logger
-  var logType = this.__config.getSetting("logger", "console");
-  if (logType == "file") {
-    // Determine the name for the log file.
-    var logFile = this.__config.getSetting("logFile", false);
-    if (!logFile) {
-      logFile = this.__config.getSetting("autName", "qxSelenium") + "_" + this.startDate.getTime() + ".log"; 
-    }
-    
-    simulation.loader.load("simulation.logger.File", this.__config.getSetting("basePath"), "");
-    return new simulation.logger.File(logFile);
-  } 
-  if (logType == "console") {
-    simulation.loader.load("simulation.logger.Console", this.__config.getSetting("basePath"));
-    return new simulation.logger.Console();
-  }
+  simulation.loader.load("simulation.logger.Console", this.__config.getSetting("basePath"));
+  return new simulation.logger.Console();
 };
 
 
