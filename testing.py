@@ -9,18 +9,11 @@ from simulationLogParser import SimulationLogParser
 from seleniumserver import SeleniumServer
 from build import Builder
 from lint import Lint
-try:
-    import json
-except ImportError, e:
-    try:
-        import simplejson as json
-    except ImportError, e:
-        raise RuntimeError, "No JSON module available"
 
 class TestRun:
     def __init__(self, config, simulate=False, logger=None):
         self.configuration = config
-        if "type" in self.configuration and self.configuration["type"] == "standalone-generator":
+        if self.getConfigSetting("type", "") == "standalone-generator":
             self.configuration = self.getConfigFromGenerator()
         
         if not logger:
@@ -59,8 +52,8 @@ class TestRun:
 
     def getLogger(self):
         logConfig = {}
-        if "logDirectory" in self.configuration["base"]:
-            logConfig["logDirectory"] = self.configuration["base"]["logDirectory"] 
+        #if "logDirectory" in self.configuration["base"]:
+        logConfig["logDirectory"] = self.getConfigSetting("base/logDirectory", None) 
         return Logger(logConfig)
     
     
@@ -126,7 +119,7 @@ class TestRun:
         self.buildStatus = {}
 
         if testType == "remote" and "testRun" in self.configuration:
-            jUrl = self.configuration["testRun"]["host"]
+            jUrl = self.getConfigSetting("testRun/host", "")
             jUrl += self.getConfigSetting("testRun/qxPath", "")
             jUrl += "buildStatus.json"
             self.buildStatus = util.getJsonFromUrl(jUrl)
@@ -138,15 +131,15 @@ class TestRun:
             except Exception, e:
                 pass  
         
+        if "lint" in self.configuration:
+            self.runLint(self.configuration["lint"])
+
         if "build" in self.configuration:
             buildConfig = self.configuration["build"]
-            buildConfig["buildLogDir"] = self.getConfigSetting("base/logDirectory", "") + "/" + buildConfig["buildLogDir"]
+            #buildConfig["buildLogDir"] = self.getConfigSetting("base/logDirectory", "") + "/" + buildConfig["buildLogDir"]
             builder = Builder(buildConfig)
             builder.buildAll()
             self.buildStatus = builder.buildStatus          
-
-        if "lint" in self.configuration:
-            self.runLint(self.configuration["lint"])
         
         if "generator" in self.configuration:
             self.log.info("Starting Generator test run")
@@ -161,22 +154,22 @@ class TestRun:
             return
         
         if self.getConfigSetting("testRun/updateSimulator", False):
-            util.svnUpdate(self.getConfigSetting("testRun/simulatorDirectory", ""))
+            util.svnUpdate(self.getConfigSetting("testRun/simulatorDirectory"))
         
         if "applications" in self.configuration["testRun"]:
-            for app in self.configuration["testRun"]["applications"]:
-                appConf = self.configuration["testRun"]["applications"][app]
+            for app in self.getConfigSetting("testRun/applications", {}):
+                #appConf = self.configuration["testRun"]["applications"][app]
+                appConf = self.getConfigSetting("testRun/applications/" + app)
                 self.runSimsForApp(app, appConf)
         
         if "collections" in self.configuration["testRun"]:
-            for coll in self.configuration["testRun"]["collections"]:
-                #if coll == "Demos":
-                collConf = self.configuration["testRun"]["collections"][coll]
-                self.runSimsForCollection(coll, collConf, self.configuration["testRun"]["simulatorDirectory"])
+            for coll in self.getConfigSetting("testRun/collections", {}):
+                collConf = self.getConfigSetting("testRun/collections/" + coll)
+                self.runSimsForCollection(coll, collConf, self.getConfigSetting("testRun/simulatorDirectory"))
     
     
     def runSimsForCollection(self, collection, collConf, simulatorBaseDir):
-        seleniumConfig = self.configuration["selenium"]
+        seleniumConfig = self.getConfigSetting("selenium")
         simulatorDirectory = os.path.join(simulatorBaseDir, "trunk", "tool", "selenium", "simulation", "demobrowser", "demo")
         print "running simulations for demos: " + repr(collConf)
         
@@ -212,7 +205,7 @@ class TestRun:
     
     def runSimsForApp(self, app, appConf):
         testReportFile = self.prepareTestReport(self.getConfigSetting("base/reportDirectory", ""), app)
-        seleniumConfig = self.configuration["selenium"]        
+        seleniumConfig = self.getConfigSetting("selenium")        
         
         manageSeleniumServer = self.getConfigSetting("selenium/seleniumServerJar", False)
         individualServer = self.getConfigSetting("individualServer", True, appConf)
@@ -247,19 +240,19 @@ class TestRun:
         
         if self.getConfigSetting("reporting/mailTo", False):
             self.formatLog(simConf["testLogFile"], testReportFile, None)
-            self.sendReport(app, testReportFile, self.configuration["reporting"])
+            self.sendReport(app, testReportFile, self.getConfigSetting("reporting"))
     
         reportServer = self.getConfigSetting("reporting/reportServer", False)
         if reportServer:
             reportConf = {
               "runType" : self.getConfigSetting("testRun/runType", ""),
               "autName" : app,
-              "autHost" : self.configuration["testRun"]["host"],
-              "autQxPath" : self.configuration["testRun"]["qxPath"],
+              "autHost" : self.getConfigSetting("testRun/host", ""),
+              "autQxPath" : self.getConfigSetting("testRun/qxPath", ""),
               "autPath" : appConf["path"],
               "startDate" : util.getTimestamp(),
-              "testHostName" : self.configuration["base"]["testHostName"],
-              "testHostId" : self.configuration["base"]["testHostId"]
+              "testHostName" : self.getConfigSetting("base/testHostName", ""),
+              "testHostId" : self.getConfigSetting("base/testHostId", ""),
             }
             try:
               self.reportResults(reportServer, simConf["testLogFile"], reportConf, simConf["ignoreLogEntries"])
@@ -269,7 +262,8 @@ class TestRun:
 
     def getSimulationConfig(self, autName, configKey, browserConf):
         self.log.info("Getting configuration for %s on %s" %(autName,browserConf["browserId"]))
-        currentAppConf = self.configuration["testRun"][configKey][autName]
+        #currentAppConf = self.configuration["testRun"][configKey][autName]
+        currentAppConf = self.getConfigSetting("testRun/%s/%s" %(configKey,autName))
         simConf = {
           "javaBin" : self.getConfigSetting("base/javaBin", "java"),
           "classPathSeparator" : self.getConfigSetting("base/classPathSeparator", ";"),                 
@@ -331,7 +325,7 @@ class TestRun:
         for browser in appConf["browsers"]:
             browserList.append(browser["browserId"])
         startDate = util.getTimestamp()
-        dummyLogFile = self.getDummyLog(self.configuration["base"]["logDirectory"], app, browserList, self.buildStatus[app]["BuildError"])
+        dummyLogFile = self.getDummyLog(self.getConfigSetting("base/logDirectory", None), app, browserList, self.buildStatus[app]["BuildError"])
         
         #TODO: ignore
         ignore = None
@@ -347,12 +341,12 @@ class TestRun:
             reportConf = {
               "runType" : self.getConfigSetting("testRun/runType", ""),
               "autName" : app,
-              "autHost" : self.configuration["testRun"]["host"],
-              "autQxPath" : self.configuration["testRun"]["qxPath"],
+              "autHost" : self.getConfigSetting("testRun/host"),
+              "autQxPath" : self.getConfigSetting("testRun/qxPath", ""),
               "autPath" : appConf["path"],
               "startDate" : startDate,
-              "testHostName" : self.configuration["base"]["testHostName"],
-              "testHostId" : self.configuration["base"]["testHostId"]
+              "testHostName" : self.getConfigSetting("base/testHostName", ""),
+              "testHostId" : self.getConfigSetting("base/testHostId", ""),
             }
             try:
               self.reportResults(reportServer, dummyLogFile, reportConf)
@@ -684,8 +678,10 @@ class Simulation:
 if __name__ == "__main__":
     try:
         rc = 0
+        import demjson
         configFile = codecs.open(sys.argv[1], "r", "UTF-8")
-        config = json.load(configFile)
+        config = configFile.read()
+        config = demjson.decode(config, allow_comments=True)
         testRun = TestRun(config)
         testRun.runPackage()
     except KeyboardInterrupt:
