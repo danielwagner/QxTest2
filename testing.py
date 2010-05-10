@@ -85,6 +85,7 @@ class TestRun:
           },
           
           "testRun" : {
+            "runType" : "",
             "simulatorDirectory" : jobConfig["simulator"],
             "host" : jobConfig["aut-host"],
             "applications" : {}
@@ -169,43 +170,43 @@ class TestRun:
         
         if "collections" in self.configuration["testRun"]:
             for coll in self.configuration["testRun"]["collections"]:
-                if coll == "Demos":
-                    collConf = self.configuration["testRun"]["collections"][coll]
-                    self.runSimsForDemos(coll, collConf, self.configuration["testRun"]["simulatorDirectory"])
+                #if coll == "Demos":
+                collConf = self.configuration["testRun"]["collections"][coll]
+                self.runSimsForCollection(coll, collConf, self.configuration["testRun"]["simulatorDirectory"])
     
     
-    def runSimsForDemos(self, collection, collConf, simulatorBaseDir):
+    def runSimsForCollection(self, collection, collConf, simulatorBaseDir):
         seleniumConfig = self.configuration["selenium"]
         simulatorDirectory = os.path.join(simulatorBaseDir, "trunk", "tool", "selenium", "simulation", "demobrowser", "demo")
         print "running simulations for demos: " + repr(collConf)
         
         #testReportFile = self.prepareTestReport(self.getConfigSetting("base/reportDirectory", ""), collection)
         
-        startDir = collConf["startDir"]
-        demoList = util.locate(startDir, "*.html")
+        scanDir = collConf["scanDir"]
+        appList = util.locate(scanDir, "*.html")
         
-        for demoDir in demoList:
-            dir, file = os.path.split(demoDir)
+        for appDir in appList:
+            dir, file = os.path.split(appDir)
             category = os.path.basename(dir) 
-            demo, ext = os.path.splitext(file)
-            #print category + " - " + demo
+            appName, ext = os.path.splitext(file)
+            #print category + " - " + appName
             
-            scriptFile = os.path.join(simulatorDirectory, category, demo + ".js")
+            scriptFile = os.path.join(simulatorDirectory, category, appName + ".js")
             if os.path.isfile(scriptFile):
-                print "got a test script for " + category + "-" + demo
+                print "got a test script for " + category + "-" + appName
 
-                self.log.info("Running simulations for %s" %category + "." + demo)
+                self.log.info("Running simulations for %s" %category + "." + appName)
                 
                 for browser in collConf["browsers"]:
-                    #seleniumServer = SeleniumServer(seleniumConfig)
-                    #seleniumServer.start()
+                    seleniumServer = SeleniumServer(seleniumConfig)
+                    seleniumServer.start()
                     simConf = self.getSimulationConfig(collection, "collections", browser)
-                    simConf["autPath"] = demoDir
+                    simConf["autPath"] = appDir
                     simConf["simulationScript"] = scriptFile
                     print repr(simConf)            
-                    #sim = Simulation(simConf)
-                    #sim.run()
-                    #seleniumServer.stop()
+                    sim = Simulation(simConf)
+                    sim.run()
+                    seleniumServer.stop()
             
         
     
@@ -251,6 +252,7 @@ class TestRun:
         reportServer = self.getConfigSetting("reporting/reportServer", False)
         if reportServer:
             reportConf = {
+              "runType" : self.getConfigSetting("testRun/runType", ""),
               "autName" : app,
               "autHost" : self.configuration["testRun"]["host"],
               "autQxPath" : self.configuration["testRun"]["qxPath"],
@@ -259,7 +261,10 @@ class TestRun:
               "testHostName" : self.configuration["base"]["testHostName"],
               "testHostId" : self.configuration["base"]["testHostId"]
             }
-            self.reportResults(reportServer, simConf["testLogFile"], reportConf)
+            try:
+              self.reportResults(reportServer, simConf["testLogFile"], reportConf, simConf["ignoreLogEntries"])
+            except Exception, e:
+              self.log.error("Error sending dummy report: " + repr(e))
     
 
     def getSimulationConfig(self, autName, configKey, browserConf):
@@ -310,6 +315,13 @@ class TestRun:
             simulationScript = self.getConfigSetting("testRun/simulationScript", None)
         simConf["simulationScript"] = simulationScript
         
+        ignoreLogEntries = self.getConfigSetting("ignoreLogEntries", None, browserConf)
+        if not ignoreLogEntries:
+            ignoreLogEntries = self.getConfigSetting("ignoreLogEntries", None, currentAppConf)
+        if not ignoreLogEntries:
+            ignoreLogEntries = self.getConfigSetting("testRun/ignoreLogEntries", None)
+        simConf["ignoreLogEntries"] = ignoreLogEntries
+        
         return simConf
 
     
@@ -333,6 +345,7 @@ class TestRun:
         reportServer = self.getConfigSetting("reporting/reportServer", False)
         if reportServer:
             reportConf = {
+              "runType" : self.getConfigSetting("testRun/runType", ""),
               "autName" : app,
               "autHost" : self.configuration["testRun"]["host"],
               "autQxPath" : self.configuration["testRun"]["qxPath"],
@@ -341,7 +354,10 @@ class TestRun:
               "testHostName" : self.configuration["base"]["testHostName"],
               "testHostId" : self.configuration["base"]["testHostId"]
             }
-            self.reportResults(reportServer, dummyLogFile, reportConf)
+            try:
+              self.reportResults(reportServer, dummyLogFile, reportConf)
+            except Exception, e:
+              self.log.error("Error sending dummy report: " + repr(e))
         
 
     def prepareTestLog(self, logDir=os.getcwd(), appName="Unknown"):
@@ -481,7 +497,7 @@ class TestRun:
             self.log.error("Report file seems incomplete, report not sent.")
 
             
-    def reportResults(self, reportServerUrl, logFile, config):        
+    def reportResults(self, reportServerUrl, logFile, config, ignore=None):        
         if (self.simulate):
             self.log.info("SIMULATION: Getting report data for %s" %config["autName"])
             return
@@ -489,8 +505,7 @@ class TestRun:
             self.log.info("Getting report data for %s" %config["autName"])
         
         testRunDict = self.getTestRunDict(config)
-        
-        slp = SimulationLogParser(logFile)
+        slp = SimulationLogParser(logFile, ignore)
         simulationData = slp.getSimulationData()
         testRunDict["simulations"] = simulationData
         
@@ -515,6 +530,7 @@ class TestRun:
             autName = config["autName"][0:config["autName"].find("Source")]
         
         testRunDict = {
+          "test_type" : config["runType"],
           "revision" : "",
           "aut_name" : autName,
           "aut_host" : config["autHost"], 
