@@ -12,7 +12,7 @@ seleniumConfig = {
 
 sys.path.append(os.path.abspath(".."))
 from log import Logger
-myLog = Logger({"logFileName" : "unittests.log"})
+myLog = Logger(filename="unittests.log", level="debug")
 
 import seleniumserver
 

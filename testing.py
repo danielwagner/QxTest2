@@ -51,10 +51,7 @@ class TestRun:
     
 
     def getLogger(self):
-        logConfig = {}
-        #if "logDirectory" in self.configuration["base"]:
-        logConfig["logDirectory"] = self.getConfigSetting("base/logDirectory", None) 
-        return Logger(logConfig)
+        return Logger(directory=self.getConfigSetting("base/logDirectory", None), level="debug")
     
     
     def getConfigFromGenerator(self):
@@ -205,6 +202,10 @@ class TestRun:
     
     def runSimsForApp(self, app, appConf):
         testReportFile = self.prepareTestReport(self.getConfigSetting("base/reportDirectory", ""), app)
+        logDirectory = self.getConfigSetting("base/logDirectory", False)
+        if logDirectory:
+            testLogFile = "%s/%s/%s.log" %(logDirectory,app,util.getTimestamp())
+        
         seleniumConfig = self.getConfigSetting("selenium")        
         
         manageSeleniumServer = self.getConfigSetting("selenium/seleniumServerJar", False)
@@ -229,6 +230,7 @@ class TestRun:
                 seleniumServer = SeleniumServer(seleniumConfig)
                 seleniumServer.start()
             simConf = self.getSimulationConfig(app, "applications", browser)
+            simConf["testLogFile"] = testLogFile
             sim = Simulation(simConf, logger=self.log)
             sim.run()
             if manageSeleniumServer and individualServer:
@@ -275,10 +277,6 @@ class TestRun:
           "browserLauncher" : self.configuration["browsers"][browserConf["browserId"]],
           "processLog" : self.getConfigSetting("processLog", None, currentAppConf)
         }
-        
-        logDirectory = self.getConfigSetting("base/logDirectory", False)
-        if logDirectory:
-            simConf["testLogFile"] = "%s/%s/%s.log" %(logDirectory,autName,util.getTimestamp())
          
         seleniumDir = self.getConfigSetting("selenium/seleniumDir", "")        
         seleniumClientDriverJar = self.getConfigSetting("selenium/seleniumClientDriverJar", "")
