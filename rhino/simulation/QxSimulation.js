@@ -41,7 +41,7 @@ simulation.QxSimulation = function(config, logger)
                     [simulation.QxSimulationBase.ISQXAPPREADY, 30000], 
                     "Waiting for qooxdoo application");
     
-    if (this.__config.getSetting("globalErrorLogging", false)) {
+    if (this.__config.getSetting("globalErrorLogging", false) || this.__config.getSetting("testEvents", false)) {
       this.addGlobalErrorHandler();
       this.addGlobalErrorGetter();        
     }
@@ -49,6 +49,10 @@ simulation.QxSimulation = function(config, logger)
     if (this.__config.getSetting("applicationLog", false) || this.__config.getSetting("disposerDebug", false)) {
       this.addRingBuffer();
       this.addRingBufferGetter();
+    }
+    
+    if (this.__config.getSetting("testEvents", false)) {
+      this.addListenerSupport();
     }
   };
    
@@ -72,8 +76,6 @@ simulation.QxSimulation = function(config, logger)
     if (lvl == "warn") {
       this.warningCount++;
     }
-    
-    msg = this.sanitize(msg);
     
     this.logger.log(msg, level);
   };
@@ -128,7 +130,7 @@ simulation.QxSimulation = function(config, logger)
    */
   that.logEnvironment = function()
   {
-    this.info("QxSimulation testing " + this.__config.getSetting("autName", "Unnamed Application") + " using browser: " + this.__config.getSetting("testBrowser"));
+    this.info(this.__config.getSetting("autName", "Unnamed Application") + " results from " + this.startDate.toUTCString());
     this.info("Application under test: " + this.__config.getSetting("autHost") + unescape(this.__config.getSetting("autPath")));
     this.info("Platform: " + environment["os.name"]);
   };
@@ -172,7 +174,6 @@ simulation.QxSimulation = function(config, logger)
   that.logResults = function()
   {
     if (this.__config.getSetting("disposerDebug", false)) {
-      print("disposer debugging");
       var getDisposerDebugLevel = "selenium.qxStoredVars['autWindow'].qx.core.Setting.get('qx.disposerDebugLevel')";
       var disposerDebugLevel = qxSelenium.getEval(getDisposerDebugLevel);
       
@@ -183,6 +184,10 @@ simulation.QxSimulation = function(config, logger)
       else { 
         this.warn("Dispose logging is active but the application's disposer debug level is 0!"); 
       }
+    }
+    
+    if (this.__config.getSetting("globalErrorLogging", false)) {
+      this.logGlobalErrors();
     }
     
     if (this.__config.getSetting("applicationLog", false) || this.__config.getSetting("disposerDebug", false)) {
@@ -214,7 +219,23 @@ simulation.QxSimulation = function(config, logger)
     for (var i=0,l=debugLogArray.length; i<l; i++) {
       this.info(debugLogArray[i]);
     }
-  };  
+  };
+  
+
+  /**
+   * Retrieves all exceptions caught by the global error handling and logs them.
+   */
+  that.logGlobalErrors = function()
+  {
+    var globalErrorString = this.getGlobalErrors();
+    var globalErrors = globalErrorString.split("|");
+    
+    for (var i=0,l=globalErrors.length; i<l; i++) {
+      if (globalErrors[i].length > 0) {
+        this.error(globalErrors[i]);
+      }
+    }
+  };
   
 
   /**

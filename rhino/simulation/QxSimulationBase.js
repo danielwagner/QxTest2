@@ -51,7 +51,7 @@ simulation.QxSimulationBase.prototype.__getLogger = function()
 simulation.QxSimulationBase.prototype.startSession = function()
 {
   qxSelenium.start();
-  qxSelenium.setTimeout(this.__config.getSetting("globalTimeout", 120000));    
+  qxSelenium.setTimeout(this.__config.getSetting("globalTimeout", 120000));
   qxSelenium.open(this.__config.getSetting("autHost") + "" + this.__config.getSetting("autPath"));
   qxSelenium.setSpeed(this.__config.getSetting("stepSpeed", "250"));
   this.setupEnvironment();
@@ -71,7 +71,6 @@ simulation.QxSimulationBase.prototype.setupEnvironment = function()
   this.storeEval('selenium.browserbot.getCurrentWindow()', 'autWindow');
   
   this.prepareNameSpace();
-  this.addSanitizer();
 };
 
 /**
@@ -89,53 +88,6 @@ simulation.QxSimulationBase.prototype.prepareNameSpace = function(win)
   if (ns == "null" || ns == "undefined") {
     qxSelenium.getEval(targetWin + '.qx.Simulation = {};');
   }
-};
-
-/**
- * Removes special and formatting characters from strings so they can be logged.
- * 
- * @param text {String} The string to be sanitized
- * @return {String} The sanitized string
- */
-simulation.QxSimulationBase.prototype.sanitize = function(text)
-{
-  // The message might be a Java object, so cast it as a String just to be sure.
-  text = String(text);
-  text = text.replace(/\n/g,'<br/>');
-  text = text.replace(/\r/g,'<br/>');
-  text = text.replace(/'/g, '&quot;');
-  text = text.replace(/ä/g, '&auml;');
-  text = text.replace(/ö/g, '&ouml;');
-  text = text.replace(/ü/g, '&uuml;');
-  text = text.replace(/Ä/g, '&Auml;');
-  text = text.replace(/Ö/g, '&Ouml;');
-  text = text.replace(/Ü/g, '&Uuml;');
-  text = text.replace(/ß/g, '&szlig;');
-  text = text.replace(/[^\w\d\-_:;\.,\"\!\?\(\)\[\]#$%&= \/\<\> ]?/gi, '');
-  return text;
-};
-
-/**
- * Adds a function <code>qx.Simulation.sanitize</code> to the AUT's 
- * window, which will strip most special characters from a given string. 
- * It's more reliable to do this in this in the browser since some
- * characters will be fubared on the way from the browser to the test
- * script.
- * 
- * The function should be executed through getEval like this:
- * <code>this.getEval('selenium.browserbot.getCurrentWindow().qx.Simulation.sanitize(string)');</code>
- */
-simulation.QxSimulationBase.prototype.addSanitizer = function()
-{
-  var sanitize = function(text)
-  {
-    text = text.replace(/'/g, '&quot;');
-    text = text.replace(/[^\w\d\-_:;\.,\"\!\?\(\)\[\]#$%&= \/\<\> ]?/gi, ''); 
-    return text;
-  };
-  
-  this.addOwnFunction("sanitize", sanitize);
-  
 };
 
 /**
@@ -269,8 +221,8 @@ simulation.QxSimulationBase.prototype.addGlobalErrorHandler = function(win)
           exString += " Stack: " + ex.stack;
         }
       }
-      var sanitizedEx = selenium.qxStoredVars['autWindow'].qx.Simulation.sanitize(exString);
-      targetWin.qx.Simulation.errorStore.push(sanitizedEx);
+      
+      targetWin.qx.Simulation.errorStore.push(exString);
     });
   };
   
@@ -308,4 +260,35 @@ simulation.QxSimulationBase.prototype.clearGlobalErrorStore = function(win)
 {
   var targetWin = win || "selenium.qxStoredVars['autWindow']";
   qxSelenium.getEval(targetWin + ".qx.Simulation.errorStore = [];");
+};
+
+simulation.QxSimulationBase.prototype.addListenerSupport = function()
+{
+  var addListener = function(objectHash, event, callback, context) {
+    var context = context || selenium.qxStoredVars["autWindow"].qx.core.Init.getApplication();
+    return selenium.qxStoredVars["autWindow"].qx.core.ObjectRegistry.fromHashCode(objectHash).addListener(event, callback, context);
+  };
+  this.addOwnFunction("addListener", addListener);
+  
+  var removeListenerById = function(objectHash, listenerId) {
+    return selenium.qxStoredVars["autWindow"].qx.core.ObjectRegistry.fromHashCode(objectHash).removeListenerById(listenerId);
+  };
+  this.addOwnFunction("removeListenerById", removeListenerById);
+};
+
+simulation.QxSimulationBase.prototype.addListener = function(locator, event, callback)
+{
+  var objectHash = qxSelenium.getQxObjectHash(locator);
+  var callbackName = event + "_bla"; 
+  this.addOwnFunction(callbackName, callback);
+  var callbackInContext = 'selenium.qxStoredVars["autWindow"].qx.Simulation["' + callbackName + '"]';  
+  var cmd = 'selenium.qxStoredVars["autWindow"].qx.Simulation.addListener("' + objectHash + '", "' + event + '", ' + callbackInContext + ')';
+  return qxSelenium.getEval(cmd);
+};
+
+simulation.QxSimulationBase.prototype.removeListenerById = function(locator, listenerId)
+{
+  var objectHash = qxSelenium.getQxObjectHash(locator);
+  var cmd = 'selenium.qxStoredVars["autWindow"].qx.Simulation.removeListenerById("' + objectHash + '", "' + listenerId + '")';
+  return qxSelenium.getEval(cmd);
 };
