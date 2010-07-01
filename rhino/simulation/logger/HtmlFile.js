@@ -42,6 +42,7 @@ simulation.logger.HtmlFile = function(filePath, prefix)
   this.log = function(logMessage, level)
   {
     var msg = logMessage ? logMessage : "";
+    msg = this.__sanitize(msg);
     var lvl = level ? level : "debug";
     msg = this.PREFIX + lvl + '">' + msg + this.SUFFIX;
     this.__write(msg);
@@ -81,4 +82,29 @@ simulation.logger.HtmlFile = function(filePath, prefix)
     var out = new java.io.BufferedWriter(fstream);
     return out;
   };
+  
+  /**
+   * Removes special and formatting characters from strings so they can be logged.
+   * 
+   * @param text {String} The string to be sanitized
+   * @return {String} The sanitized string
+   */
+  this.__sanitize = function(text)
+  {
+    // The message might be a Java object, so cast it as a String just to be sure.
+    text = String(text);
+    text = text.replace(/\n/g,'<br/>');
+    text = text.replace(/\r/g,'<br/>');
+    text = text.replace(/'/g, '&quot;');
+    text = text.replace(/ä/g, '&auml;');
+    text = text.replace(/ö/g, '&ouml;');
+    text = text.replace(/ü/g, '&uuml;');
+    text = text.replace(/Ä/g, '&Auml;');
+    text = text.replace(/Ö/g, '&Ouml;');
+    text = text.replace(/Ü/g, '&Uuml;');
+    text = text.replace(/ß/g, '&szlig;');
+    text = text.replace(/[^\w\d\-_:;\.,\"\!\?\(\)\[\]#$%&= \/\<\> ]?/gi, '');
+    return text;
+  };  
+  
 };
