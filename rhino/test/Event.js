@@ -1,6 +1,6 @@
-test.Event = function(config)
+test.Event = function()
 {
-  var superInst = new simulation.QxSimulation(config);
+  var superInst = new simulation.QxSimulation();
   
   function Impl() {
     
@@ -14,7 +14,7 @@ test.Event = function(config)
       
       this.logResults();
       this.logDuration();
-      qxSelenium.stop();
+      simulation.qxSelenium.stop();
     };
     
     this.testEvent = function()
@@ -24,7 +24,7 @@ test.Event = function(config)
         this.assertEquals(ev.getType(), "bla");
       };
       var listenerId = this.addListener(locator, "execute", callback);
-      qxSelenium.qxClick(locator);
+      simulation.qxSelenium.qxClick(locator);
       Packages.java.lang.Thread.sleep(2000);
       this.removeListenerById(locator, listenerId);
     };

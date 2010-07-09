@@ -17,9 +17,8 @@
 
 ************************************************************************ */
 
-simulation.QxSimulationBase = function(config)
+simulation.QxSimulationBase = function()
 {  
-  this.__config = config;
   this.startDate = new Date();  
   
   /*
@@ -41,10 +40,10 @@ simulation.QxSimulationBase = function(config)
  */
 simulation.QxSimulationBase.prototype.startSession = function()
 {
-  qxSelenium.start();
-  qxSelenium.setTimeout(this.__config.getSetting("globalTimeout", 120000));
-  qxSelenium.open(this.__config.getSetting("autHost") + "" + this.__config.getSetting("autPath"));
-  qxSelenium.setSpeed(this.__config.getSetting("stepSpeed", "250"));
+  simulation.qxSelenium.start();
+  simulation.qxSelenium.setTimeout(simulation.config.getSetting("globalTimeout", 120000));
+  simulation.qxSelenium.open(simulation.config.getSetting("autHost") + "" + simulation.config.getSetting("autPath"));
+  simulation.qxSelenium.setSpeed(simulation.config.getSetting("stepSpeed", "250"));
   this.setupEnvironment();
 };
 
@@ -58,7 +57,7 @@ simulation.QxSimulationBase.prototype.setupEnvironment = function()
    * Store the AUT window object to avoid calling 
    * selenium.browserbot.getCurrentWindow() repeatedly.
    */
-  qxSelenium.getEval('selenium.qxStoredVars = {}');    
+  simulation.qxSelenium.getEval('selenium.qxStoredVars = {}');    
   this.storeEval('selenium.browserbot.getCurrentWindow()', 'autWindow');
   
   this.prepareNameSpace();
@@ -75,9 +74,9 @@ simulation.QxSimulationBase.prototype.setupEnvironment = function()
 simulation.QxSimulationBase.prototype.prepareNameSpace = function(win)
 {
   var targetWin = win || 'selenium.qxStoredVars["autWindow"]';
-  var ns = String(qxSelenium.getEval(targetWin + '.qx.Simulation'));
+  var ns = String(simulation.qxSelenium.getEval(targetWin + '.qx.Simulation'));
   if (ns == "null" || ns == "undefined") {
-    qxSelenium.getEval(targetWin + '.qx.Simulation = {};');
+    simulation.qxSelenium.getEval(targetWin + '.qx.Simulation = {};');
   }
 };
 
@@ -101,7 +100,7 @@ simulation.QxSimulationBase.prototype.storeEval = function(code, keyName)
     throw new Error("No key name specified for storeEval()");
   }
 
-  qxSelenium.getEval('selenium.qxStoredVars["' + keyName + '"] = ' + String(code));
+  simulation.qxSelenium.getEval('selenium.qxStoredVars["' + keyName + '"] = ' + String(code));
 };
 
 /**
@@ -129,7 +128,7 @@ simulation.QxSimulationBase.prototype.addOwnFunction = function(funcName, func)
   func = func.replace(/\n/,'');
   func = func.replace(/\r/,'');
   
-  qxSelenium.getEval('selenium.browserbot.getCurrentWindow().qx.Simulation.' + funcName + ' = ' + func);
+  simulation.qxSelenium.getEval('selenium.browserbot.getCurrentWindow().qx.Simulation.' + funcName + ' = ' + func);
 };
 
 /**
@@ -140,7 +139,7 @@ simulation.QxSimulationBase.prototype.addRingBuffer = function(win)
   var qxWin = win || "selenium.qxStoredVars['autWindow']";
   var rb = "new " + qxWin + ".qx.log.appender.RingBuffer()";
   this.storeEval(rb, "ringBuffer");  
-  var ret = qxSelenium.getEval(qxWin + ".qx.log.Logger.register(selenium.qxStoredVars['ringBuffer'])");
+  var ret = simulation.qxSelenium.getEval(qxWin + ".qx.log.Logger.register(selenium.qxStoredVars['ringBuffer'])");
 };
 
 /**
@@ -184,7 +183,7 @@ simulation.QxSimulationBase.prototype.addRingBufferGetter = function()
 simulation.QxSimulationBase.prototype.addGlobalErrorHandler = function(win)
 {
   var qxWin = win || "selenium.qxStoredVars['autWindow']";
-  qxSelenium.getEval(qxWin + ".qx.Simulation.errorStore = [];");
+  simulation.qxSelenium.getEval(qxWin + ".qx.Simulation.errorStore = [];");
   
   var addHandler = function(autWin)
   {
@@ -218,7 +217,7 @@ simulation.QxSimulationBase.prototype.addGlobalErrorHandler = function(win)
   };
   
   this.addOwnFunction("addGlobalErrorHandler", addHandler);
-  qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.addGlobalErrorHandler(" + qxWin + ");");  
+  simulation.qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.addGlobalErrorHandler(" + qxWin + ");");  
 };
 
 simulation.QxSimulationBase.prototype.addGlobalErrorGetter = function(win)
@@ -237,7 +236,7 @@ simulation.QxSimulationBase.prototype.addGlobalErrorGetter = function(win)
 simulation.QxSimulationBase.prototype.getGlobalErrors = function(win)
 {
   var qxWin = win || "selenium.qxStoredVars['autWindow']";
-  var exceptions = qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.getGlobalErrors(" + qxWin + ")");
+  var exceptions = simulation.qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.getGlobalErrors(" + qxWin + ")");
   return String(exceptions);
 };
 
@@ -250,7 +249,7 @@ simulation.QxSimulationBase.prototype.getGlobalErrors = function(win)
 simulation.QxSimulationBase.prototype.clearGlobalErrorStore = function(win)
 {
   var targetWin = win || "selenium.qxStoredVars['autWindow']";
-  qxSelenium.getEval(targetWin + ".qx.Simulation.errorStore = [];");
+  simulation.qxSelenium.getEval(targetWin + ".qx.Simulation.errorStore = [];");
 };
 
 simulation.QxSimulationBase.prototype.addListenerSupport = function()
@@ -269,17 +268,17 @@ simulation.QxSimulationBase.prototype.addListenerSupport = function()
 
 simulation.QxSimulationBase.prototype.addListener = function(locator, event, callback)
 {
-  var objectHash = qxSelenium.getQxObjectHash(locator);
+  var objectHash = simulation.qxSelenium.getQxObjectHash(locator);
   var callbackName = event + "_bla"; 
   this.addOwnFunction(callbackName, callback);
   var callbackInContext = 'selenium.qxStoredVars["autWindow"].qx.Simulation["' + callbackName + '"]';  
   var cmd = 'selenium.qxStoredVars["autWindow"].qx.Simulation.addListener("' + objectHash + '", "' + event + '", ' + callbackInContext + ')';
-  return qxSelenium.getEval(cmd);
+  return simulation.qxSelenium.getEval(cmd);
 };
 
 simulation.QxSimulationBase.prototype.removeListenerById = function(locator, listenerId)
 {
-  var objectHash = qxSelenium.getQxObjectHash(locator);
+  var objectHash = simulation.qxSelenium.getQxObjectHash(locator);
   var cmd = 'selenium.qxStoredVars["autWindow"].qx.Simulation.removeListenerById("' + objectHash + '", "' + listenerId + '")';
-  return qxSelenium.getEval(cmd);
+  return simulation.qxSelenium.getEval(cmd);
 };

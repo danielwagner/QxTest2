@@ -17,7 +17,7 @@
 
 ************************************************************************ */
 
-simulation.qxselenium.QxSelenium.createQxSelenium = function(config)
+simulation.qxselenium.QxSelenium.createQxSelenium = function()
 {
   // Basic sanity check: No sense in continuing without QxSelenium.
   try {
@@ -29,10 +29,10 @@ simulation.qxselenium.QxSelenium.createQxSelenium = function(config)
   }
   
   // Create and configure QxSelenium instance
-  var qxSelenium = new QxSelenium(config.getSetting("selServer"),
-                                        config.getSetting("selPort"),
-                                        config.getSetting("testBrowser"),
-                                        config.getSetting("autHost"));
+  var qxSelenium = new QxSelenium(simulation.config.getSetting("selServer"),
+                                  simulation.config.getSetting("selPort"),
+                                  simulation.config.getSetting("testBrowser"),
+                                  simulation.config.getSetting("autHost"));
   
   return qxSelenium;
 }

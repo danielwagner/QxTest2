@@ -17,10 +17,15 @@
 
 ************************************************************************ */
 
-simulation.test.TestSuite = function(config, logger) 
+simulation.loader.require(["simulation.log.appender.Console"]);
+
+simulation.unit.TestSuite = function() 
 {
-  var testClassList = config.getSetting("testClasses");
-  var basePath = config.getSetting("testClassPath");
+  var console = new simulation.log.appender.Console();
+  simulation.log.Logger.register(console);
+  
+  var testClassList = simulation.config.getSetting("testClasses");
+  var basePath = simulation.config.getSetting("testClassPath");
   this.testClasses = [];
   
   for (var i=0,l=testClassList.length; i<l; i++) {
@@ -29,7 +34,7 @@ simulation.test.TestSuite = function(config, logger)
     // Create the test class instance
     var testClassArray = testClassList[i].split(".");
     var testClass = simulation.loader.getObjectByName(testClassArray);
-    var testInst = new testClass(config, logger);
+    var testInst = new testClass();
     testInst.classname = testClassList[i];
     this.testClasses.push(testInst);
   }

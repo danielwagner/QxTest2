@@ -33,15 +33,15 @@ if (basePath !== "") {
 }
 
 simulation.loader.require(["simulation.util.Config", "simulation.qxselenium.QxSelenium", "simulation.QxSimulation", "simulation.log.Logger"]);
-var config = new simulation.util.Config(args);
-qxSelenium = simulation.qxselenium.QxSelenium.createQxSelenium(config);
+simulation.config = new simulation.util.Config(args);
+qxSelenium = simulation.qxselenium.QxSelenium.createQxSelenium();
 
-simulation.loader.require(config.getSetting("testClasses"),config.getSetting("testClassPath"));
+simulation.loader.require(simulation.config.getSetting("testClasses"),simulation.config.getSetting("testClassPath"));
 
-var testClassList = config.getSetting("testClasses");
+var testClassList = simulation.config.getSetting("testClasses");
 for (var i=0,l=testClassList.length; i<l; i++) {
   var testClassNs = testClassList[i].split(".");
   var testClass = simulation.loader.getObjectByName(testClassNs);
-  var sim = new testClass(config);
+  var sim = new testClass();
   sim.main();
 }

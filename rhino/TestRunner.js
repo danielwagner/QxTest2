@@ -32,10 +32,14 @@ if (basePath !== "") {
   load(["simulation/Loader.js"]);
 }
 
-simulation.loader.require(["simulation.util.Config", "simulation.qxselenium.QxSelenium", "simulation.log.Logger", "simulation.test.TestSuite"]);
-var config = new simulation.util.Config(args);
+simulation.loader.require(
+  [
+    "simulation.util.Config",
+    "simulation.qxselenium.QxSelenium",
+    "simulation.log.Logger",
+    "simulation.unit.TestSuite"]);
 
-qxSelenium = simulation.qxselenium.QxSelenium.createQxSelenium(config);
-
-var suite = new simulation.test.TestSuite(config);
+simulation.config = new simulation.util.Config(args);
+simulation.qxSelenium = simulation.qxselenium.QxSelenium.createQxSelenium();
+var suite = new simulation.unit.TestSuite();
 suite.runTests();

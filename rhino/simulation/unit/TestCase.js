@@ -19,9 +19,9 @@
 
 simulation.loader.require(["simulation.QxSimulation"]);
 
-simulation.test.TestCase = function(config, logger)
+simulation.unit.TestCase = function()
 {
-  var that = new simulation.QxSimulation(config, logger);
+  var that = new simulation.QxSimulation();
   
   that._testCount = 0;
   that._testsFailed = 0;
@@ -40,7 +40,6 @@ simulation.test.TestCase = function(config, logger)
   that.runTests = function() {    
     var testList = this._getTestList();    
     this.startSession();
-    this.logEnvironment();
     this.info("Running " + this._testCount + " tests from " + this.classname);
         
     for (var i=0,l=testList.length; i<l; i++) {
@@ -75,8 +74,7 @@ simulation.test.TestCase = function(config, logger)
       
     }
     this.info(this._testsFailed + " failed tests out of " + this._testCount + " total");
-    this.logResults();
-    qxSelenium.stop();
+    simulation.qxSelenium.stop();
   };
   
   return that;

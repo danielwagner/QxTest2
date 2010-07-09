@@ -19,9 +19,9 @@
 
 simulation.loader.require(["simulation.QxSimulationBase"]);
 
-simulation.QxSimulation = function(config)
+simulation.QxSimulation = function()
 {
-  var that = new simulation.QxSimulationBase(config);
+  var that = new simulation.QxSimulationBase();
   that.logger = simulation.log.Logger;
   that.testFailed = false;
   that.errorCount = 0;
@@ -42,17 +42,17 @@ simulation.QxSimulation = function(config)
                     [simulation.QxSimulationBase.ISQXAPPREADY, 30000], 
                     "Waiting for qooxdoo application");
     
-    if (this.__config.getSetting("globalErrorLogging", false) || this.__config.getSetting("testEvents", false)) {
+    if (simulation.config.getSetting("globalErrorLogging", false) || simulation.config.getSetting("testEvents", false)) {
       this.addGlobalErrorHandler();
       this.addGlobalErrorGetter();        
     }
     
-    if (this.__config.getSetting("applicationLog", false) || this.__config.getSetting("disposerDebug", false)) {
+    if (simulation.config.getSetting("applicationLog", false) || simulation.config.getSetting("disposerDebug", false)) {
       this.addRingBuffer();
       this.addRingBufferGetter();
     }
     
-    if (this.__config.getSetting("testEvents", false)) {
+    if (simulation.config.getSetting("testEvents", false)) {
       this.addListenerSupport();
     }
   };
@@ -131,8 +131,8 @@ simulation.QxSimulation = function(config)
    */
   that.logEnvironment = function()
   {
-    this.info(this.__config.getSetting("autName", "Unnamed Application") + " results from " + this.startDate.toUTCString());
-    this.info("Application under test: " + this.__config.getSetting("autHost") + unescape(this.__config.getSetting("autPath")));
+    this.info(simulation.config.getSetting("autName", "Unnamed Application") + " results from " + this.startDate.toUTCString());
+    this.info("Application under test: " + simulation.config.getSetting("autHost") + unescape(simulation.config.getSetting("autPath")));
     this.info("Platform: " + environment["os.name"]);
   };
   
@@ -140,7 +140,7 @@ simulation.QxSimulation = function(config)
    * Logs the test browser's user agent string.
    */
   that.logUserAgent = function(){
-    var agent = qxSelenium.getEval('navigator.userAgent');
+    var agent = simulation.qxSelenium.getEval('navigator.userAgent');
     this.info("User agent: " + agent);
   };
   
@@ -174,9 +174,9 @@ simulation.QxSimulation = function(config)
    */
   that.logResults = function()
   {
-    if (this.__config.getSetting("disposerDebug", false)) {
+    if (simulation.config.getSetting("disposerDebug", false)) {
       var getDisposerDebugLevel = "selenium.qxStoredVars['autWindow'].qx.core.Setting.get('qx.disposerDebugLevel')";
-      var disposerDebugLevel = qxSelenium.getEval(getDisposerDebugLevel);
+      var disposerDebugLevel = simulation.qxSelenium.getEval(getDisposerDebugLevel);
       
       if (parseInt(disposerDebugLevel, 10) > 0 ) {
         this.qxShutdown();
@@ -186,20 +186,20 @@ simulation.QxSimulation = function(config)
       }
     }
     
-    if (this.__config.getSetting("globalErrorLogging", false)) {
+    if (simulation.config.getSetting("globalErrorLogging", false)) {
       this.logGlobalErrors();
     }
     
-    if (this.__config.getSetting("applicationLog", false) || this.__config.getSetting("disposerDebug", false)) {
+    if (simulation.config.getSetting("applicationLog", false) || simulation.config.getSetting("disposerDebug", false)) {
       this.logRingBufferEntries();
     }
     
     if (!this.testFailed) {
-      if (this.__config.getSetting("debug", false)) {
+      if (simulation.config.getSetting("debug", false)) {
         this.debug("Test run finished successfully.");
       }
       
-      this.info(this.__config.getSetting("autName", "Unnamed application") + " results: " + this.errorCount + " errors, " + this.warningCount + " warnings");
+      this.info(simulation.config.getSetting("autName", "Unnamed application") + " results: " + this.errorCount + " errors, " + this.warningCount + " warnings");
     }
     
   };
@@ -211,7 +211,7 @@ simulation.QxSimulation = function(config)
    */
   that.logRingBufferEntries = function()
   {
-    var debugLog = qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.getRingBufferEntries()");
+    var debugLog = simulation.qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.getRingBufferEntries()");
     debugLog = String(debugLog);
     var debugLogArray = debugLog.split("|");
     
@@ -253,7 +253,7 @@ simulation.QxSimulation = function(config)
    */
   that.qxShutdown = function()
   {
-    qxSelenium.getEval('selenium.qxStoredVars["autWindow"].qx.core.ObjectRegistry.shutdown()', "Shutting down qooxdoo application");
+    simulation.qxSelenium.getEval('selenium.qxStoredVars["autWindow"].qx.core.ObjectRegistry.shutdown()', "Shutting down qooxdoo application");
   };
   
   
@@ -265,8 +265,8 @@ simulation.QxSimulation = function(config)
    */
   that.qxOpen = function(uri)
   {
-    var openUri = uri || this.__config.getSetting("autHost") + "" + this.__config.getSetting("autPath");
-    qxSelenium.open(openUri);
+    var openUri = uri || simulation.config.getSetting("autHost") + "" + simulation.config.getSetting("autPath");
+    simulation.qxSelenium.open(openUri);
     this.setupEnvironment();
   };
   
@@ -284,7 +284,7 @@ simulation.QxSimulation = function(config)
     var result = null;    
     var desc = description || "Running QxSelenium command " + command;
     try {
-      result = qxSelenium[command].apply(qxSelenium, params);
+      result = simulation.qxSelenium[command].apply(simulation.qxSelenium, params);
     }
     catch(ex) {
       if (ex.javaException) {
