@@ -199,8 +199,7 @@ simulation.QxSimulation = function(config, logger)
         this.debug("Test run finished successfully.");
       }
       
-      var totalIssues = this.errorCount + this.warningCount;
-      this.info(this.__config.getSetting("autName", "Unnamed application") + " ended with warnings or errors: " + totalIssues);
+      this.info(this.__config.getSetting("autName", "Unnamed application") + " results: " + this.errorCount + " errors, " + this.warningCount + " warnings");
     }
     
   };
