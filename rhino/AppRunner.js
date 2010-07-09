@@ -22,12 +22,17 @@ var basePath = "";
 for (var i=0; i<args.length; i++) {
   keyVal = args[i].split("=");
   if (keyVal[0] == "basePath") {
-    basePath = keyVal[1];    
+    basePath = keyVal[1];
+    break;
   }
 }
-load([basePath + "/simulation/Loader.js"]);
+if (basePath !== "") {
+  load([basePath + "/simulation/Loader.js"]);
+} else {
+  load(["simulation/Loader.js"]);
+}
 
-simulation.loader.require(["simulation.util.Config", "simulation.qxselenium.QxSelenium", "simulation.QxSimulation"]);
+simulation.loader.require(["simulation.util.Config", "simulation.qxselenium.QxSelenium", "simulation.QxSimulation", "simulation.log.Logger"]);
 var config = new simulation.util.Config(args);
 qxSelenium = simulation.qxselenium.QxSelenium.createQxSelenium(config);
 

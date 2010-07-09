@@ -19,9 +19,10 @@
 
 simulation.loader.require(["simulation.QxSimulationBase"]);
 
-simulation.QxSimulation = function(config, logger)
+simulation.QxSimulation = function(config)
 {
-  var that = new simulation.QxSimulationBase(config, logger);
+  var that = new simulation.QxSimulationBase(config);
+  that.logger = simulation.log.Logger;
   that.testFailed = false;
   that.errorCount = 0;
   that.warningCount = 0;
@@ -178,7 +179,6 @@ simulation.QxSimulation = function(config, logger)
       var disposerDebugLevel = qxSelenium.getEval(getDisposerDebugLevel);
       
       if (parseInt(disposerDebugLevel, 10) > 0 ) {
-        //this.logDisposerDebug();
         this.qxShutdown();
       } 
       else { 

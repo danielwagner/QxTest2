@@ -17,12 +17,10 @@
 
 ************************************************************************ */
 
-simulation.QxSimulationBase = function(config, logger)
+simulation.QxSimulationBase = function(config)
 {  
   this.__config = config;
-  this.startDate = new Date();
-  this.logger = logger || this.__getLogger();
-  
+  this.startDate = new Date();  
   
   /*
    * Frequently used Javascript code snippets meant to be run in the tested 
@@ -35,13 +33,6 @@ simulation.QxSimulationBase = function(config, logger)
     + simulation.QxSimulationBase.QXAPPINSTANCE 
     + ') { qxReady = true; } } catch(e) {} qxReady;';
   
-};
-
-simulation.QxSimulationBase.prototype.__getLogger = function()
-{
-  // Create a logger
-  simulation.loader.load("simulation.logger.Console", this.__config.getSetting("basePath"));
-  return new simulation.logger.Console();
 };
 
 

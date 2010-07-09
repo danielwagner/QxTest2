@@ -17,7 +17,9 @@
 
 ************************************************************************ */
 
-simulation.logger.Console = function()
+simulation.loader.require(["simulation.log.Logger"]);
+
+simulation.log.appender.Console = function()
 {
   this.__out = java.lang.System.out;
   this.__err = java.lang.System.err;

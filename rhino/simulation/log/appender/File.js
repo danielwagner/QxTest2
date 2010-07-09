@@ -17,14 +17,12 @@
 
 ************************************************************************ */
 
-if (!simulation.logger) {
-  simulation.logger = {}
-}
+simulation.loader.require(["simulation.log.Logger"]);
 
-simulation.logger.File = function(filePath, prefix)
+simulation.log.appender.File = function(filePath, prefix)
 {
   if (!filePath) {
-    throw new Error("simulation.logger.File: No log file path specified!");
+    throw new Error("simulation.log.File: No log file path specified!");
   }
   this.LOGFILEPATH = filePath || null;
   this.PREFIX = prefix || "";
