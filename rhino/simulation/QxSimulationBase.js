@@ -223,21 +223,26 @@ simulation.QxSimulationBase.prototype.addGlobalErrorHandler = function(win)
 simulation.QxSimulationBase.prototype.addGlobalErrorGetter = function(win)
 {
   var qxWin = win || "selenium.qxStoredVars['autWindow']";
-  var globalErr = function(win)
+  var getGlobalErrors = function(win)
   {
      var targetWin = win || selenium.qxStoredVars['autWindow'];
      var exceptions = targetWin.qx.Simulation.errorStore;
      var exString = exceptions.join("|");
      return exString;     
   };
-  this.addOwnFunction("getGlobalErrors", globalErr);
+  this.addOwnFunction("getGlobalErrors", getGlobalErrors);
 };
 
 simulation.QxSimulationBase.prototype.getGlobalErrors = function(win)
 {
   var qxWin = win || "selenium.qxStoredVars['autWindow']";
   var exceptions = simulation.qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.getGlobalErrors(" + qxWin + ")");
-  return String(exceptions);
+  exceptions = String(exceptions);
+  if (!exceptions.length > 0) {
+    return [];
+  }
+  var globalErrors = String(exceptions).split("|");
+  return globalErrors;
 };
 
 /**
@@ -250,6 +255,7 @@ simulation.QxSimulationBase.prototype.clearGlobalErrorStore = function(win)
 {
   var targetWin = win || "selenium.qxStoredVars['autWindow']";
   simulation.qxSelenium.getEval(targetWin + ".qx.Simulation.errorStore = [];");
+  var ex = simulation.qxSelenium.getEval(targetWin + ".qx.Simulation.errorStore;");
 };
 
 simulation.QxSimulationBase.prototype.addListenerSupport = function()

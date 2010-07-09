@@ -226,8 +226,7 @@ simulation.QxSimulation = function()
    */
   that.logGlobalErrors = function()
   {
-    var globalErrorString = this.getGlobalErrors();
-    var globalErrors = globalErrorString.split("|");
+    var globalErrors = this.getGlobalErrors();
     
     for (var i=0,l=globalErrors.length; i<l; i++) {
       if (globalErrors[i].length > 0) {
