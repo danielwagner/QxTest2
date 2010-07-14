@@ -43,17 +43,18 @@ simulation.QxSimulation = function()
                     "Waiting for qooxdoo application");
     
     if (simulation.config.getSetting("globalErrorLogging", false) || simulation.config.getSetting("testEvents", false)) {
-      this.addGlobalErrorHandler();
-      this.addGlobalErrorGetter();        
+      this._addGlobalErrorHandler();
+      this._addGlobalErrorGetter();        
     }
     
     if (simulation.config.getSetting("applicationLog", false) || simulation.config.getSetting("disposerDebug", false)) {
-      this.addRingBuffer();
-      this.addRingBufferGetter();
+      this._addRingBuffer();
+      this._addRingBufferGetter();
     }
     
     if (simulation.config.getSetting("testEvents", false)) {
-      this.addListenerSupport();
+      this._addListenerSupport();
+      simulation.qxSelenium.getEval('selenium.qxStoredVars["eventStore"] = [];');
     }
   };
    

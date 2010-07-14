@@ -18,7 +18,7 @@
 ************************************************************************ */
 
 simulation.QxSimulationBase = function()
-{  
+{
   this.startDate = new Date();  
   
   /*
@@ -106,7 +106,7 @@ simulation.QxSimulationBase.prototype.storeEval = function(code, keyName)
 /**
  * Adds a function to the "qx.Simulation" namespace of the application under 
  * test. This function can then be called using 
- * <code>Simulation.getEval("selenium.browserbot.getCurrentWindow().qx.Simulation.funcName();")</code>
+ * <code>selenium.getEval("selenium.browserbot.getCurrentWindow().qx.Simulation.funcName();")</code>
  * 
  * @param funcName {String} name of the function to be added
  * @param func {Function} the function to be added
@@ -132,9 +132,13 @@ simulation.QxSimulationBase.prototype.addOwnFunction = function(funcName, func)
 };
 
 /**
- * Creates a new qx.log.appender.RingBuffer in the AUT and registers it.
+ * Creates a new qx.log.appender.RingBuffer in the AUT and registers it. This
+ * can be used to access the AUT's log messages from the test script.
+ * 
+ * @param win {String} The target window. Must evaluate to a JavaScript Window 
+ * object. Default: The AUT's window.
  */
-simulation.QxSimulationBase.prototype.addRingBuffer = function(win)
+simulation.QxSimulationBase.prototype._addRingBuffer = function(win)
 {
   var qxWin = win || "selenium.qxStoredVars['autWindow']";
   var rb = "new " + qxWin + ".qx.log.appender.RingBuffer()";
@@ -146,7 +150,7 @@ simulation.QxSimulationBase.prototype.addRingBuffer = function(win)
  * Adds a function to the AUT that retrieves all messages from the logger 
  * created by addRingBuffer.
  */
-simulation.QxSimulationBase.prototype.addRingBufferGetter = function()
+simulation.QxSimulationBase.prototype._addRingBufferGetter = function()
 {
   var getRingBufferEntries = function(autWin) {
     var targetWin = autWin || selenium.qxStoredVars['autWindow'];
@@ -174,13 +178,11 @@ simulation.QxSimulationBase.prototype.addRingBufferGetter = function()
  * Creates a global error handler that stores JavaScript exceptions that are 
  * thrown in the specified window. Global Error Handling must be enabled in the 
  * AUT.
- * Also adds a simple getter function that returns the contents of the exception
- * store as a string separated by pipe characters ("|");
  *
  * @param win {String} The target window. Must evaluate to a JavaScript Window 
  * object. Default: The AUT's window.
  */
-simulation.QxSimulationBase.prototype.addGlobalErrorHandler = function(win)
+simulation.QxSimulationBase.prototype._addGlobalErrorHandler = function(win)
 {
   var qxWin = win || "selenium.qxStoredVars['autWindow']";
   simulation.qxSelenium.getEval(qxWin + ".qx.Simulation.errorStore = [];");
@@ -220,7 +222,15 @@ simulation.QxSimulationBase.prototype.addGlobalErrorHandler = function(win)
   simulation.qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.addGlobalErrorHandler(" + qxWin + ");");  
 };
 
-simulation.QxSimulationBase.prototype.addGlobalErrorGetter = function(win)
+/**
+ * Adds a utility function to the AUT window that reads the contents of the
+ * global error store and returns them as a pipe-separated string so they can be
+ * read by the test script.
+ * 
+ * @param win {String} The target window. Must evaluate to a JavaScript Window 
+ * object. Default: The AUT's window. 
+ */
+simulation.QxSimulationBase.prototype._addGlobalErrorGetter = function(win)
 {
   var qxWin = win || "selenium.qxStoredVars['autWindow']";
   var getGlobalErrors = function(win)
@@ -233,6 +243,14 @@ simulation.QxSimulationBase.prototype.addGlobalErrorGetter = function(win)
   this.addOwnFunction("getGlobalErrors", getGlobalErrors);
 };
 
+/**
+ * Returns the error messages of any exceptions caught by the AUT's global error
+ * handler.
+ * 
+ * @param win {String} The target window. Must evaluate to a JavaScript Window 
+ * object. Default: The AUT's window. 
+ * @return {Array} A list of error messages
+ */
 simulation.QxSimulationBase.prototype.getGlobalErrors = function(win)
 {
   var qxWin = win || "selenium.qxStoredVars['autWindow']";
@@ -258,7 +276,11 @@ simulation.QxSimulationBase.prototype.clearGlobalErrorStore = function(win)
   var ex = simulation.qxSelenium.getEval(targetWin + ".qx.Simulation.errorStore;");
 };
 
-simulation.QxSimulationBase.prototype.addListenerSupport = function()
+/**
+ * Adds utility functions to the AUT that allow attaching and removing event
+ * listeners to qooxdoo objects identified by their object registry hash. 
+ */
+simulation.QxSimulationBase.prototype._addListenerSupport = function()
 {
   var addListener = function(objectHash, event, callback, context) {
     var context = context || selenium.qxStoredVars["autWindow"].qx.core.Init.getApplication();
@@ -272,6 +294,14 @@ simulation.QxSimulationBase.prototype.addListenerSupport = function()
   this.addOwnFunction("removeListenerById", removeListenerById);
 };
 
+/**
+ * Adds an event listener to a qooxdoo widget in the AUT.
+ * 
+ * @param {String} locator A (Qx)Selenium locator string that finds a qooxdoo widget
+ * @param {String} event Name of the event to listen for
+ * @param {Function} callback Javascript code to be executed if the event is fired
+ * @return {String} the listener's ID
+ */
 simulation.QxSimulationBase.prototype.addListener = function(locator, event, callback)
 {
   var objectHash = simulation.qxSelenium.getQxObjectHash(locator);
@@ -282,6 +312,14 @@ simulation.QxSimulationBase.prototype.addListener = function(locator, event, cal
   return simulation.qxSelenium.getEval(cmd);
 };
 
+/**
+ * Removes an event listener from a qooxdoo widget in the AUT.
+ * 
+ * @param {String} locator A (Qx)Selenium locator string that finds a qooxdoo widget
+ * @param {String} listenerId The listener's ID as returned by addListener
+ * @return {String} "true" or "false" depending on whether the listener was
+ * removed successfully
+ */
 simulation.QxSimulationBase.prototype.removeListenerById = function(locator, listenerId)
 {
   var objectHash = simulation.qxSelenium.getQxObjectHash(locator);
