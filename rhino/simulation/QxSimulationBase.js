@@ -326,3 +326,45 @@ simulation.QxSimulationBase.prototype.removeListenerById = function(locator, lis
   var cmd = 'selenium.qxStoredVars["autWindow"].qx.Simulation.removeListenerById("' + objectHash + '", "' + listenerId + '")';
   return simulation.qxSelenium.getEval(cmd);
 };
+
+/**
+ * Attaches a listener to a qooxdoo object that clones the incoming event and
+ * adds it to the event store.
+ * 
+ * @param {String} locator A (Qx)Selenium locator string that finds a qooxdoo widget
+ * @param {String} event The name of the event to listen for
+ * @return {String} The listener's ID as returned by addListener
+ */
+simulation.QxSimulationBase.prototype.storeEvent = function(locator, event)
+{
+  var callback = function(ev)
+  {
+    selenium.qxStoredVars["eventStore"].push(ev.clone());
+  };
+  return this.addListener(locator, event, callback);
+};
+
+/**
+ * Executes a JavaScript snippet on a stored event and returns the result.
+ * 
+ * @param {Integer} index Index of the event in the store
+ * @param {String} detailString Code snippet to execute, e.g. "getTarget().classname" 
+ * @return {String} The result of the executed code
+ */
+simulation.QxSimulationBase.prototype.getStoredEventDetail = function(index, detailString)
+{
+  var cmd = 'selenium.qxStoredVars["eventStore"][' + index + ']';
+  if (detailString[0] != "[" && detailString[0] != ".") {
+    cmd += ".";
+  }
+  cmd += detailString;
+  return simulation.qxSelenium.getEval(cmd);
+};
+
+/**
+ * Empties the event store.
+ */
+simulation.QxSimulationBase.prototype.clearEventStore = function()
+{
+  simulation.qxSelenium.getEval('selenium.qxStoredVars["eventStore"] = []');
+};
