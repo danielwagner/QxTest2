@@ -369,3 +369,14 @@ simulation.QxSimulationBase.prototype.clearEventStore = function()
 {
   simulation.qxSelenium.getEval('selenium.qxStoredVars["eventStore"] = []');
 };
+
+/**
+ * Returns the number of entries in the event store.
+ * 
+ * @return {Integer} The event count
+ */
+simulation.QxSimulationBase.prototype.getStoredEventCount = function()
+{
+  var storedEvents = simulation.qxSelenium.getEval('selenium.qxStoredVars["eventStore"].length');
+  return parseInt(storedEvents, 10);
+};
