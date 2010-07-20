@@ -322,6 +322,7 @@ simulation.QxSimulationBase.prototype.addListener = function(locator, event, cal
  */
 simulation.QxSimulationBase.prototype.removeListenerById = function(locator, listenerId)
 {
+  listenerId = String(listenerId).replace(/"/, '\\"');
   var objectHash = simulation.qxSelenium.getQxObjectHash(locator);
   var cmd = 'selenium.qxStoredVars["autWindow"].qx.Simulation.removeListenerById("' + objectHash + '", "' + listenerId + '")';
   return simulation.qxSelenium.getEval(cmd);
