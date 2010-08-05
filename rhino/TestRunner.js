@@ -17,6 +17,8 @@
 
 ************************************************************************ */
 
+qx = {}; 
+
 var args = arguments ? arguments : "";
 var basePath = "";
 for (var i=0; i<args.length; i++) {
@@ -26,20 +28,27 @@ for (var i=0; i<args.length; i++) {
     break;
   }
 }
+
+
 if (basePath !== "") {
-  load([basePath + "/simulation/Loader.js"]);
+  load([basePath + "/qx-oo.js"]);
+  load([basePath + "/qx/Loader.js"]);
 } else {
-  load(["simulation/Loader.js"]);
+  load(["qx-oo.js"]);
+  load(["qx/Loader.js"]);
 }
 
-simulation.loader.require(
+qx.Loader.require(
   [
-    "simulation.util.Config",
-    "simulation.qxselenium.QxSelenium",
-    "simulation.log.Logger",
-    "simulation.unit.TestSuite"]);
+    "qx.simulation.util.Config",
+    "qx.log.appender.RhinoConsole",
+    "qx.simulation.unit.TestSuite"
+    //"qx.simulation.qxselenium.QxSelenium"
+  ]);
 
-simulation.config = new simulation.util.Config(args);
-simulation.qxSelenium = simulation.qxselenium.QxSelenium.createQxSelenium();
-var suite = new simulation.unit.TestSuite();
+qx.log.Logger.register(qx.log.appender.RhinoConsole);
+qx.simulation.config = new qx.simulation.util.Config(args);
+
+var suite = new qx.simulation.unit.TestSuite();
 suite.runTests();
+

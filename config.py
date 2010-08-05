@@ -40,7 +40,7 @@ conf = {
     'Chrome 4b'         : '*googlechrome /opt/google/chrome/google-chrome'
   },
     
-  "testRun" : {
+  "XXXtestRun" : {
     "simulatorDirectory"    : "/home/dwagner/workspace/qooxdoo.contrib/Simulator",
     "updateSimulator"       : False,
     "host"                  : "http://172.17.12.142",
@@ -50,6 +50,7 @@ conf = {
       "API" : {
         "path"                  : "/framework/api/index.html",
         "simulationScript"      : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/api/test_api.js",
+        #"ignoreLogEntries"      : ["No documentation errors"],
         "browsers" : [
           {
             "browserId"             : "Firefox 3.6"
@@ -140,10 +141,10 @@ conf = {
     
     },
     
-    "XXXcollections" : {
+    "collections" : {
       "Demos" : {
         "path" : "/application/demobrowser/build/demo",
-        "startDir" : "/var/www/qx/trunk/qooxdoo/application/demobrowser/build/demo", 
+        "scanDir" : "/var/www/qx/trunk/qooxdoo/application/demobrowser/build/demo", 
         "simulationScript" : "/home/dwagner/workspace/qooxdoo.contrib/Simulator/trunk/tool/selenium/simulation/demobrowser/demo",
         "browsers" : [
           {
