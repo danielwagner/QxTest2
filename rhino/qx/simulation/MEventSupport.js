@@ -31,7 +31,7 @@ qx.Mixin.define("qx.simulation.MEventSupport",
     addListener : function(locator, event, callback)
     {
       var objectHash = qx.simulation.qxSelenium.getQxObjectHash(locator);
-      var callbackName = event + "_bla"; 
+      var callbackName = event + "_" + new Date().getTime(); 
       this.addOwnFunction(callbackName, callback);
       var callbackInContext = 'selenium.qxStoredVars["autWindow"].qx.Simulation["' + callbackName + '"]';  
       var cmd = 'selenium.qxStoredVars["autWindow"].qx.Simulation.addListener("' + objectHash + '", "' + event + '", ' + callbackInContext + ')';
