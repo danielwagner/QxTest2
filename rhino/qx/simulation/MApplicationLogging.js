@@ -1,3 +1,27 @@
+/* ************************************************************************
+
+   qooxdoo - the new era of web development
+
+   http://qooxdoo.org
+
+   Copyright:
+     2006-2010 1&1 Internet AG, Germany, http://www.1and1.org
+
+   License:
+     LGPL: http://www.gnu.org/licenses/lgpl.html
+     EPL: http://www.eclipse.org/org/documents/epl-v10.php
+     See the LICENSE file in the project's top-level directory for details.
+
+   Authors:
+     * Daniel Wagner (d_wagner)
+
+************************************************************************ */
+
+/**
+ * Provides functionality to capture the log messages of a tested qooxdoo 
+ * application.
+ */
+
 qx.Mixin.define("qx.simulation.MApplicationLogging",
 {
   members:
@@ -5,6 +29,7 @@ qx.Mixin.define("qx.simulation.MApplicationLogging",
     /**
      * Adds a function to the AUT that retrieves all messages from the logger 
      * created by addRingBuffer.
+     * @lint ignoreGlobal(selenium)
      */
     _addRingBufferGetter : function()
     {
@@ -31,11 +56,11 @@ qx.Mixin.define("qx.simulation.MApplicationLogging",
     },
 
     /**
-     * Creates a new qx.log.appender.RingBuffer in the AUT and registers it. This
-     * can be used to access the AUT's log messages from the test script.
+     * Creates a new qx.log.appender.RingBuffer in the AUT and registers it. 
+     * This can be used to access the AUT's log messages from the test code.
      * 
-     * @param win {String} The target window. Must evaluate to a JavaScript Window 
-     * object. Default: The AUT's window.
+     * @param win {String} JavaScript snippet that evaluates as a Window object 
+     * accessible to the current Selenium instance. Default: The AUT's window.
      */
     _addRingBuffer : function(win)
     {

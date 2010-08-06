@@ -17,16 +17,15 @@
 
 ************************************************************************ */
 
+/**
+ * Base class for automated GUI tests of qooxdoo applications using QxSelenium.
+ */
+
 qx.Loader.require(["qx.simulation.qxselenium.QxSelenium"]);
 
 qx.Class.define("qx.simulation.QxSimulationBase", {
   
   extend : qx.core.Object,
-
-  construct : function()
-  {
-    this.startDate = new Date();
-  },
 
   members :
   {
@@ -36,6 +35,7 @@ qx.Class.define("qx.simulation.QxSimulationBase", {
      */
     startSeleniumSession : function()
     {
+      // Create QxSelenium instance if necessary
       if (!qx.simulation.qxSelenium) {
         qx.simulation.qxSelenium = qx.simulation.qxselenium.QxSelenium.createQxSelenium();
       }
@@ -48,7 +48,7 @@ qx.Class.define("qx.simulation.QxSimulationBase", {
 
     /**
      * Add some testing utilities to the qooxdoo application. Must be called
-     * whenever a qooxdoo application is loaded.
+     * whenever a qooxdoo application is (re)loaded.
      */
     setupEnvironment : function()
     {
@@ -63,12 +63,13 @@ qx.Class.define("qx.simulation.QxSimulationBase", {
     },
 
     /**
-     * Attaches a "Simulation" namespace object to the specified window's qx object.
-     * This will be used to store custom methods added by addOwnFunction. If no 
-     * window is specified, the AUT's window is used.
+     * Attaches a "Simulation" namespace object to the specified window's qx 
+     * object. This will be used to store custom methods added by the testing
+     * framework using @see{#addOwnFunction}. If no window is specified, the 
+     * AUT's window is used.
      * 
-     * @param win {String} The name of the target window. Must evaluate to a 
-     * JavaScript Window object.
+     * @param win {String} JavaScript snippet that evaluates as a Window object 
+     * accessible to the current Selenium instance. Default: The AUT's window.
      */
     prepareNameSpace : function(win)
     {
@@ -80,14 +81,14 @@ qx.Class.define("qx.simulation.QxSimulationBase", {
     },
 
     /**
-     * Evaluates a JavaScript snippet and stores the result in the "qxStoredVars" 
-     * map attached to the global selenium object.
-     * Stored values can be retrieved through getEval:
+     * Evaluates a JavaScript snippet and stores the result in the 
+     * "qxStoredVars" map attached to the AUT's global selenium object.
+     * Stored values can be retrieved through Selenium.getEval:
      * <code>getEval('selenium.qxStoredVars["keyName"]')</code> 
      *
      * @param code {String} JavaScript snippet to be evaluated
-     * @param varName {String} The name for the property the eval result will be 
-     * stored in.
+     * @param varName {String} The name for the key the eval result will be 
+     * stored under.
      */
     storeEval : function(code, keyName)
     {

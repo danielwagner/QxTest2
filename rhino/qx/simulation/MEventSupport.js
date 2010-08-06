@@ -1,3 +1,26 @@
+/* ************************************************************************
+
+   qooxdoo - the new era of web development
+
+   http://qooxdoo.org
+
+   Copyright:
+     2006-2010 1&1 Internet AG, Germany, http://www.1and1.org
+
+   License:
+     LGPL: http://www.gnu.org/licenses/lgpl.html
+     EPL: http://www.eclipse.org/org/documents/epl-v10.php
+     See the LICENSE file in the project's top-level directory for details.
+
+   Authors:
+     * Daniel Wagner (d_wagner)
+
+************************************************************************ */
+
+/**
+ * Provides event testing support.
+ */
+
 qx.Mixin.define("qx.simulation.MEventSupport",
 {
   members:
@@ -21,12 +44,14 @@ qx.Mixin.define("qx.simulation.MEventSupport",
     },
 
     /**
-     * Adds an event listener to a qooxdoo widget in the AUT.
+     * Adds an event listener to a qooxdoo object in the AUT.
      * 
-     * @param {String} locator A (Qx)Selenium locator string that finds a qooxdoo widget
-     * @param {String} event Name of the event to listen for
-     * @param {Function} callback Javascript code to be executed if the event is fired
-     * @return {String} the listener's ID
+     * @param locator {String} A (Qx)Selenium locator string that finds a 
+     * qooxdoo widget
+     * @param event {String} Name of the event to listen for
+     * @param callback {Function} Javascript code to be executed if the event is
+     * fired
+     * @return {String} the generated listener's ID
      */
     addListener : function(locator, event, callback)
     {
@@ -41,9 +66,11 @@ qx.Mixin.define("qx.simulation.MEventSupport",
     /**
      * Removes an event listener from a qooxdoo widget in the AUT.
      * 
-     * @param {String} locator A (Qx)Selenium locator string that finds a qooxdoo widget
-     * @param {String} listenerId The listener's ID as returned by addListener
-     * @return {String} "true" or "false" depending on whether the listener was
+     * @param locator {String} A (Qx)Selenium locator string that finds a 
+     * qooxdoo widget
+     * @param listenerId {String}  The listener's ID as returned by 
+     * @see{#addListener}
+     * @return {Boolean} Whether the listener was
      * removed successfully
      */
     removeListenerById : function(locator, listenerId)
@@ -51,15 +78,17 @@ qx.Mixin.define("qx.simulation.MEventSupport",
       listenerId = String(listenerId).replace(/"/, '\\"');
       var objectHash = qx.simulation.qxSelenium.getQxObjectHash(locator);
       var cmd = 'selenium.qxStoredVars["autWindow"].qx.Simulation.removeListenerById("' + objectHash + '", "' + listenerId + '")';
-      return qx.simulation.qxSelenium.getEval(cmd);
+      var result = qx.simulation.qxSelenium.getEval(cmd);
+      return String(result) == "true";
     },
 
     /**
-     * Attaches a listener to a qooxdoo object that clones the incoming event and
-     * adds it to the event store.
+     * Attaches a listener to a qooxdoo object that clones the incoming event 
+     * object and adds it to the event store.
      * 
-     * @param {String} locator A (Qx)Selenium locator string that finds a qooxdoo widget
-     * @param {String} event The name of the event to listen for
+     * @param locator {String} A (Qx)Selenium locator string that finds a 
+     * qooxdoo widget
+     * @param event {String} The name of the event to listen for
      * @return {String} The listener's ID as returned by addListener
      */
     storeEvent : function(locator, event)
@@ -74,8 +103,9 @@ qx.Mixin.define("qx.simulation.MEventSupport",
     /**
      * Executes a JavaScript snippet on a stored event and returns the result.
      * 
-     * @param {Integer} index Index of the event in the store
-     * @param {String} detailString Code snippet to execute, e.g. "getTarget().classname" 
+     * @param index {Integer} Index of the event in the store
+     * @param detailString {String} Code snippet to execute, e.g. 
+     * "getTarget().classname" 
      * @return {String} The result of the executed code
      */
     getStoredEventDetail : function(index, detailString)

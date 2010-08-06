@@ -17,6 +17,10 @@
 
 ************************************************************************ */
 
+/**
+ * Base class for unit test-style GUI interaction tests.
+ */
+
 qx.Loader.require(["qx.simulation.QxSimulation"]);
 
 qx.Class.define("qx.simulation.unit.TestCase", {
@@ -30,11 +34,16 @@ qx.Class.define("qx.simulation.unit.TestCase", {
   },
 
   members:
-  {   
+  {
+    /**
+     * Returns a list of all "test..." methods on this instance.
+     * 
+     * @return {String[]} List of test function names
+     */
     _getTestList : function()
     {
       var testList = [];
-      for (prop in this) {
+      for (var prop in this) {
         if (prop.indexOf("test") == 0 && typeof this[prop] == "function") {
           this._testCount++;
           testList.push(prop);
@@ -43,6 +52,9 @@ qx.Class.define("qx.simulation.unit.TestCase", {
       return testList;
     },
 
+    /**
+     * Runs all test functions of the current class. 
+     */
     runTests : function()
     {
       var testList = this._getTestList();

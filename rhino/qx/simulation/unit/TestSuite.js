@@ -16,6 +16,11 @@
      * Daniel Wagner (d_wagner)
 
 ************************************************************************ */
+
+/**
+ * Loads a list of test classes and prepares them to be run.
+ */
+
 qx.Loader.require(["qx.simulation.unit.TestCase"]);
 
 qx.Class.define("qx.simulation.unit.TestSuite", {
@@ -42,19 +47,18 @@ qx.Class.define("qx.simulation.unit.TestSuite", {
 
   members :
   {
-
+    /**
+     * Run all configured tests. 
+     */
     runTests : function() {
       for (var i=0,l=this.testClasses.length; i<l; i++) {
         var testClass = this.testClasses[i];
-        /*
         try {
           testClass.runTests();
         }
         catch(ex) {
           print("Unexpected error while running " + testClass.classname + ": " + ex.javaException);
         }
-        */
-        testClass.runTests();
       }
     }
 

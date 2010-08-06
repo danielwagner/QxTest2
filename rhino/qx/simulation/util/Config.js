@@ -17,10 +17,24 @@
 
 ************************************************************************ */
 
+/**
+ * Holds configuration settings for QxSelenium tests. Does limited type 
+ * conversion for command line parameters, sets default values and checks for
+ * required settings. 
+ */
+
 qx.Class.define("qx.simulation.util.Config", {
 
   extend : qx.core.Object,
 
+  /**
+   * 
+   * @param args {Array} A list of arguments. Each argument must be a string 
+   * like "key=value"
+   * @param requiredList {Array} List of mandatory configuration keys
+   * @param defaultMap {Map} Default values that will be used if they're not
+   * overridden by the arguments 
+   */
   construct : function(args, requiredList, defaultMap)
   {
     this.required = requiredList || ['selServer', 'selPort', 'testBrowser', 'autHost', 'autPath'];
@@ -33,11 +47,25 @@ qx.Class.define("qx.simulation.util.Config", {
     __defaults: null,
     __config : null,
 
+    /**
+     * Removes whitespace at the start and end of a string.
+     * 
+     * @param stringToTrim {String} The string to trim 
+     * @return {String} The trimmed string
+     */
     trim : function(stringToTrim) 
     {
       return stringToTrim.replace(/^\s+|\s+$/g,"");
     },
 
+    /**
+     * Converts an array of "key=value" entries into a map. Converts "true" and
+     * "false" values into booleans and values like "[foo,bar]" into arrays. 
+     * 
+     * @param args {Array} A list of arguments. Each argument must be a string
+     * like "key=value"
+     * @return {Map} Configuration map
+     */
     _getConfigFromArgs : function(args)
     {
       var conf = {}; 
@@ -75,13 +103,12 @@ qx.Class.define("qx.simulation.util.Config", {
     },
 
     /**
-     * Initalizes the configuration, sets defaults if necessary and validates the 
-     * configuration.
+     * Initalizes the configuration, sets defaults if necessary and validates 
+     * the configuration.
      * 
-     * @private
-     * @param baseConf {Map} a map of configuration settings
-     * @param args {String} optional space-delimited string of 'key=value' pairs
-     * @return {Map} the configuration for this Simulation instance
+     * @param args {Array} A list of arguments. Each argument must be a string
+     * like "key=value"
+     * @return {Map} Configuration map
      * @throws an exception if a required setting is missing
      */
     init : function(args)
@@ -113,11 +140,11 @@ qx.Class.define("qx.simulation.util.Config", {
      * Accessor for configuration settings.
      * 
      * @param prop {String} the name of a configuration key
-     * @param defaultValue {String} Optional value to be returned if the key isn't
-     * defined in the configuration
-     * @return {String} the value of the requested configuration key
-     * @throw an exception if no key was specified or the key doesn't exist in the
-     *   configuration map and no default value was specified
+     * @param defaultValue {String} Optional value to be returned if the key 
+     * isn't defined in the configuration
+     * @return {String|Boolean|Array} the value of the requested configuration key
+     * @throws an exception if no key was specified or the key doesn't exist in 
+     * the configuration map and no default value was specified
      */
     getSetting : function(prop, defaultValue)
     {

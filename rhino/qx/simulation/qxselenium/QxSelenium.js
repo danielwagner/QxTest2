@@ -17,12 +17,22 @@
 
 ************************************************************************ */
 
+/**
+ * Creates and configures a QxSelenium object.
+ */
 qx.Class.define("qx.simulation.qxselenium.QxSelenium", {
 
   extend : qx.core.Object,
 
   statics :
   {
+    /**
+     * Imports the QxSelenium (Java) class, and creates an instance.
+     * 
+     * @return {Object} The configured QxSelenium object
+     * @lint ignoreGlobal(importClass)
+     * @lint ignoreGlobal(QxSelenium)
+     */
     createQxSelenium : function()
     {
       // Basic sanity check: No sense in continuing without QxSelenium.

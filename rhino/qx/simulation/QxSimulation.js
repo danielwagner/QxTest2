@@ -17,13 +17,21 @@
 
 ************************************************************************ */
 
+/**
+ * Automated GUI test of a qooxdoo application using QxSelenium. Provides access
+ * to the AUT's log messages and any exceptions caught by qooxdoo's global error
+ * handling. Also supports event testing.
+ */
+
 qx.Loader.require(["qx.simulation.QxSimulationBase"]);
+
 qx.Class.define("qx.simulation.QxSimulation", {
 
   extend : qx.simulation.QxSimulationBase,
 
   construct : function()
   {
+    this.startDate = new Date();
     this.testFailed = false;
     this.errorCount = 0;
     this.warningCount = 0;
@@ -79,7 +87,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
     },    
     
     /**
-     * Logs information about the test environment.
+     * Logs basic information about the test environment.
      */
     logEnvironment : function()
     {
@@ -149,14 +157,17 @@ qx.Class.define("qx.simulation.QxSimulation", {
           this.debug("Test run finished successfully.");
         }
         
-        this.info(qx.simulation.config.getSetting("autName", "Unnamed application") + " results: " + this.errorCount + " errors, " + this.warningCount + " warnings");
+        // FIXME: Counting logged errors and warnings no longer works after 
+        // switching to qx.log.Logger. Find an alternate way to implement this.
+        //this.info(qx.simulation.config.getSetting("autName", "Unnamed application") + " results: " + this.errorCount + " errors, " + this.warningCount + " warnings");
       }
       
     },
 
     /**
-     * Retrieves all messages from the logger created by addRingBuffer and writes 
-     * them to the simulation log.
+     * Retrieves all messages from the AUT-side logger created by 
+     * @see{qx.simulation.MApplicationLogging.addRingBuffer} and writes them to 
+     * the simulation log.
      */
     logRingBufferEntries : function()
     {
@@ -170,7 +181,8 @@ qx.Class.define("qx.simulation.QxSimulation", {
     },
 
     /**
-     * Retrieves all exceptions caught by the global error handling and logs them.
+     * Retrieves all exceptions caught by the AUT's  global error handling and 
+     * logs them.
      */
     logGlobalErrors : function()
     {
@@ -184,7 +196,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
     },
     
     /**
-     * Pause script execution for a given amount of time.
+     * Pauses script execution for a given amount of time.
      * 
      * @param interval {Integer} Time (in milliseconds) to wait.
      */
@@ -195,7 +207,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
     
     
     /**
-     * Shuts down the qooxdoo application. Can be used for disposer debug logging.
+     * Shuts down the qooxdoo application.
      */
     qxShutdown : function()
     {
@@ -203,10 +215,10 @@ qx.Class.define("qx.simulation.QxSimulation", {
     },
     
     /**
-     * Open a URI containing a qooxdoo application and prepare it for testing. If no
-     * URI is given, the current AUT is reloaded.
+     * Loads the URI of a qooxdoo application in the test browser and prepares 
+     * it for testing. If no URI is given, the current AUT is reloaded.
      * 
-     * @param {String} uri Optional URI of the qooxdoo application to be loaded.
+     * @param uri {String} Optional URI of the qooxdoo application to be loaded.
      */
     qxOpen : function(uri)
     {
@@ -217,12 +229,12 @@ qx.Class.define("qx.simulation.QxSimulation", {
     
     
     /**
-     * Call any QxSelenium method wrapped in a try... catch block so that 
+     * Call any (Qx)Selenium method wrapped in a try... catch block so that 
      * exceptions won't cause the test to fail. Exceptions are logged.
      * 
-     * @param {String} command The name of a QxSelenium method
-     * @param {Array} params Array containing parameters for the QxSelenium method
-     * @param {String} description Optional description to be used for logging
+     * @param command {String} The name of a (Qx)Selenium method
+     * @param params {Array} List of parameters for the QxSelenium method
+     * @param description {String} Optional description to be used for logging
      */
     runCommand : function(command, params, description)
     {
@@ -246,4 +258,3 @@ qx.Class.define("qx.simulation.QxSimulation", {
   }  
 
 });
-
