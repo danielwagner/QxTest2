@@ -74,49 +74,6 @@ qx.Class.define("qx.simulation.QxSimulation", {
     },    
     
     /**
-     * Logs a debug message
-     * 
-     * @param logMessage {String} The message to be logged.
-     */
-    debug : function(logMessage)
-    {
-      qx.log.Logger.debug(logMessage);
-    },
-    
-    
-    /**
-     * Logs an info message
-     * 
-     * @param logMessage {String} The message to be logged.
-     */
-    info : function(logMessage)
-    {
-      qx.log.Logger.info(logMessage);
-    },
-    
-    
-    /**
-     * Logs a warning message
-     * 
-     * @param logMessage {String} The message to be logged.
-     */
-    warn : function(logMessage)
-    {
-      qx.log.Logger.warn(logMessage);
-    },
-    
-    
-    /**
-     * Logs an error message
-     * 
-     * @param logMessage {String} The message to be logged.
-     */
-    error : function(logMessage)
-    {
-      qx.log.Logger.error(logMessage);
-    },
-
-    /**
      * Logs information about the test environment.
      */
     logEnvironment : function()
