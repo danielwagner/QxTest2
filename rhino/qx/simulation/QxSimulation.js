@@ -29,6 +29,12 @@ qx.Class.define("qx.simulation.QxSimulation", {
     this.errorCount = 0;
     this.warningCount = 0;
   },
+  
+  statics :
+  {
+    AUTWINDOW : 'selenium.qxStoredVars["autWindow"]',
+    QXAPPLICATION : 'qx.core.Init.getApplication()'
+  },
 
   members :
   {
@@ -41,7 +47,11 @@ qx.Class.define("qx.simulation.QxSimulation", {
     startSession : function()
     {
       this.startSeleniumSession();
-      var qxAppReady = 'var qxReady = false; try { if (selenium.qxStoredVars["autWindow"].qx.core.Init.getApplication()) { qxReady = true; } } catch(e) {} qxReady;'
+      var qxAppReady = 'var qxReady = false; try { if (' + 
+                  qx.simulation.QxSimulation.AUTWINDOW + '.' + 
+                  qx.simulation.QxSimulation.QXAPPLICATION + 
+                  ') { qxReady = true; } } catch(e) {} qxReady;';
+      
       this.runCommand("waitForCondition", 
                       [qxAppReady, 30000], 
                       "Waiting for qooxdoo application");
@@ -153,7 +163,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
     logResults : function()
     {
       if (qx.simulation.config.getSetting("disposerDebug", false)) {
-        var getDisposerDebugLevel = "selenium.qxStoredVars['autWindow'].qx.core.Setting.get('qx.disposerDebugLevel')";
+        var getDisposerDebugLevel = qx.simulation.QxSimulation.AUTWINDOW + ".qx.core.Setting.get('qx.disposerDebugLevel')";
         var disposerDebugLevel = qx.simulation.qxSelenium.getEval(getDisposerDebugLevel);
         
         if (parseInt(disposerDebugLevel, 10) > 0 ) {
@@ -188,7 +198,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
      */
     logRingBufferEntries : function()
     {
-      var debugLog = qx.simulation.qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.getRingBufferEntries()");
+      var debugLog = qx.simulation.qxSelenium.getEval(qx.simulation.QxSimulation.AUTWINDOW + ".qx.Simulation.getRingBufferEntries()");
       debugLog = String(debugLog);
       var debugLogArray = debugLog.split("|");
       
@@ -227,7 +237,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
      */
     qxShutdown : function()
     {
-      simulation.qxSelenium.getEval('selenium.qxStoredVars["autWindow"].qx.core.ObjectRegistry.shutdown()', "Shutting down qooxdoo application");
+      simulation.qxSelenium.getEval(qx.simulation.QxSimulation.AUTWINDOW + '.qx.core.ObjectRegistry.shutdown()', "Shutting down qooxdoo application");
     },
     
     /**
