@@ -18,7 +18,6 @@
 ************************************************************************ */
 
 qx.Loader.require(["qx.simulation.QxSimulationBase"]);
-
 qx.Class.define("qx.simulation.QxSimulation", {
 
   extend : qx.simulation.QxSimulationBase,
@@ -57,16 +56,22 @@ qx.Class.define("qx.simulation.QxSimulation", {
                       "Waiting for qooxdoo application");
       
       if (qx.simulation.config.getSetting("globalErrorLogging", false) || qx.simulation.config.getSetting("testEvents", false)) {
+        qx.Loader.require(["qx.simulation.MGlobalErrorHandling"]);
+        qx.Class.include(qx.simulation.QxSimulationBase, qx.simulation.MGlobalErrorHandling);
         this._addGlobalErrorHandler();
-        this._addGlobalErrorGetter();        
+        this._addGlobalErrorGetter();
       }
       
       if (qx.simulation.config.getSetting("applicationLog", false) || qx.simulation.config.getSetting("disposerDebug", false)) {
+        qx.Loader.require(["qx.simulation.MApplicationLogging"]);
+        qx.Class.include(qx.simulation.QxSimulationBase, qx.simulation.MApplicationLogging);
         this._addRingBuffer();
         this._addRingBufferGetter();
       }
       
       if (qx.simulation.config.getSetting("testEvents", false)) {
+        qx.Loader.require(["qx.simulation.MEventSupport"]);
+        qx.Class.include(qx.simulation.QxSimulationBase, qx.simulation.MEventSupport);
         this._addListenerSupport();
         qx.simulation.qxSelenium.getEval('selenium.qxStoredVars["eventStore"] = [];');
       }

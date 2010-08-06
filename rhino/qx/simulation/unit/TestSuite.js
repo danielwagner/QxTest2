@@ -46,12 +46,15 @@ qx.Class.define("qx.simulation.unit.TestSuite", {
     runTests : function() {
       for (var i=0,l=this.testClasses.length; i<l; i++) {
         var testClass = this.testClasses[i];
+        /*
         try {
           testClass.runTests();
         }
         catch(ex) {
           print("Unexpected error while running " + testClass.classname + ": " + ex.javaException);
         }
+        */
+        testClass.runTests();
       }
     }
 

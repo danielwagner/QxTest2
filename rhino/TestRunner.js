@@ -43,7 +43,6 @@ qx.Loader.require(
     "qx.simulation.util.Config",
     "qx.log.appender.RhinoConsole",
     "qx.simulation.unit.TestSuite"
-    //"qx.simulation.qxselenium.QxSelenium"
   ]);
 
 qx.log.Logger.register(qx.log.appender.RhinoConsole);
@@ -51,4 +50,3 @@ qx.simulation.config = new qx.simulation.util.Config(args);
 
 var suite = new qx.simulation.unit.TestSuite();
 suite.runTests();
-
