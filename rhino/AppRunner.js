@@ -17,6 +17,8 @@
 
 ************************************************************************ */
 
+qx = {}; 
+
 var args = arguments ? arguments : "";
 var basePath = "";
 for (var i=0; i<args.length; i++) {
@@ -26,22 +28,33 @@ for (var i=0; i<args.length; i++) {
     break;
   }
 }
+
 if (basePath !== "") {
-  load([basePath + "/simulation/Loader.js"]);
+  load([basePath + "/qx-oo.js"]);
+  load([basePath + "/qx/Loader.js"]);
 } else {
-  load(["simulation/Loader.js"]);
+  load(["qx-oo.js"]);
+  load(["qx/Loader.js"]);
 }
 
-simulation.loader.require(["simulation.util.Config", "simulation.qxselenium.QxSelenium", "simulation.QxSimulation", "simulation.log.Logger"]);
-simulation.config = new simulation.util.Config(args);
-qxSelenium = simulation.qxselenium.QxSelenium.createQxSelenium();
+qx.Loader.require(
+  [
+    "qx.simulation.util.Config",
+    "qx.log.appender.RhinoConsole",
+    "qx.simulation.QxSimulation"
+  ]);
 
-simulation.loader.require(simulation.config.getSetting("testClasses"),simulation.config.getSetting("testClassPath"));
+qx.log.Logger.register(qx.log.appender.RhinoConsole);
+qx.simulation.config = new qx.simulation.util.Config(args);
 
-var testClassList = simulation.config.getSetting("testClasses");
+var testClassList = qx.simulation.config.getSetting("testClasses");
+var testClassPath = qx.simulation.config.getSetting("testClassPath");
+
 for (var i=0,l=testClassList.length; i<l; i++) {
-  var testClassNs = testClassList[i].split(".");
-  var testClass = simulation.loader.getObjectByName(testClassNs);
-  var sim = new testClass();
-  sim.main();
+  qx.Loader.load(testClassList[i], testClassPath);
+  // Create the test class instance
+  var testClassArray = testClassList[i].split(".");
+  var testClass = qx.Loader.getObjectByName(testClassArray);
+  var testInst = new testClass();
+  testInst.main();
 }
