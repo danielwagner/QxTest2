@@ -21,12 +21,17 @@
  * Base class for automated GUI tests of qooxdoo applications using QxSelenium.
  */
 
-qx.Loader.require(["qx.simulation.qxselenium.QxSelenium"]);
+qx.Loader.require(["qx.simulation.QxSelenium"]);
 
 qx.Class.define("qx.simulation.QxSimulationBase", {
   
   extend : qx.core.Object,
 
+  construct : function()
+  {
+    this.qxSelenium = qx.simulation.QxSelenium.create();
+  },
+  
   members :
   {
 
@@ -35,14 +40,10 @@ qx.Class.define("qx.simulation.QxSimulationBase", {
      */
     startSeleniumSession : function()
     {
-      // Create QxSelenium instance if necessary
-      if (!qx.simulation.qxSelenium) {
-        qx.simulation.qxSelenium = qx.simulation.qxselenium.QxSelenium.createQxSelenium();
-      }
-      qx.simulation.qxSelenium.start();
-      qx.simulation.qxSelenium.setTimeout(qx.simulation.config.getSetting("globalTimeout", 120000));
-      qx.simulation.qxSelenium.open(qx.simulation.config.getSetting("autHost") + "" + qx.simulation.config.getSetting("autPath"));
-      qx.simulation.qxSelenium.setSpeed(qx.simulation.config.getSetting("stepSpeed", "250"));
+      this.qxSelenium.start();
+      this.qxSelenium.setTimeout(qx.simulation.config.getSetting("globalTimeout", 120000));
+      this.qxSelenium.open(qx.simulation.config.getSetting("autHost") + "" + qx.simulation.config.getSetting("autPath"));
+      this.qxSelenium.setSpeed(qx.simulation.config.getSetting("stepSpeed", "250"));
       this.setupEnvironment();
     },
 
@@ -56,7 +57,7 @@ qx.Class.define("qx.simulation.QxSimulationBase", {
        * Store the AUT window object to avoid calling 
        * selenium.browserbot.getCurrentWindow() repeatedly.
        */
-      qx.simulation.qxSelenium.getEval('selenium.qxStoredVars = {}');    
+      this.qxSelenium.getEval('selenium.qxStoredVars = {}');    
       this.storeEval('selenium.browserbot.getCurrentWindow()', 'autWindow');
       
       this.prepareNameSpace();
@@ -74,9 +75,9 @@ qx.Class.define("qx.simulation.QxSimulationBase", {
     prepareNameSpace : function(win)
     {
       var targetWin = win || 'selenium.qxStoredVars["autWindow"]';
-      var ns = String(qx.simulation.qxSelenium.getEval(targetWin + '.qx.Simulation'));
+      var ns = String(this.qxSelenium.getEval(targetWin + '.qx.Simulation'));
       if (ns == "null" || ns == "undefined") {
-        qx.simulation.qxSelenium.getEval(targetWin + '.qx.Simulation = {};');
+        this.qxSelenium.getEval(targetWin + '.qx.Simulation = {};');
       }
     },
 
@@ -100,7 +101,7 @@ qx.Class.define("qx.simulation.QxSimulationBase", {
         throw new Error("No key name specified for storeEval()");
       }
 
-      qx.simulation.qxSelenium.getEval('selenium.qxStoredVars["' + keyName + '"] = ' + String(code));
+      this.qxSelenium.getEval('selenium.qxStoredVars["' + keyName + '"] = ' + String(code));
     },
 
     /**
@@ -128,7 +129,7 @@ qx.Class.define("qx.simulation.QxSimulationBase", {
       func = func.replace(/\n/,'');
       func = func.replace(/\r/,'');
       
-      qx.simulation.qxSelenium.getEval('selenium.browserbot.getCurrentWindow().qx.Simulation.' + funcName + ' = ' + func);
+      this.qxSelenium.getEval('selenium.browserbot.getCurrentWindow().qx.Simulation.' + funcName + ' = ' + func);
     }
 
   }

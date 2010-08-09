@@ -29,6 +29,7 @@ qx.Class.define("qx.simulation.unit.TestCase", {
 
   construct : function()
   {
+    this.base(arguments);
     this._testCount = 0;
     this._testsFailed = 0;
   },
@@ -93,7 +94,7 @@ qx.Class.define("qx.simulation.unit.TestCase", {
         
       }
       this.info(this._testsFailed + " failed tests out of " + this._testCount + " total");
-      qx.simulation.qxSelenium.stop();
+      this.qxSelenium.stop();
     }
   }
 });

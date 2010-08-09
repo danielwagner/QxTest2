@@ -20,7 +20,7 @@
 /**
  * Creates and configures a QxSelenium object.
  */
-qx.Class.define("qx.simulation.qxselenium.QxSelenium", {
+qx.Class.define("qx.simulation.QxSelenium", {
 
   extend : qx.core.Object,
 
@@ -33,7 +33,7 @@ qx.Class.define("qx.simulation.qxselenium.QxSelenium", {
      * @lint ignoreGlobal(importClass)
      * @lint ignoreGlobal(QxSelenium)
      */
-    createQxSelenium : function()
+    create : function()
     {
       // Basic sanity check: No sense in continuing without QxSelenium.
       try {

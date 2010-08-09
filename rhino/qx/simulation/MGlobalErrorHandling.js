@@ -38,7 +38,7 @@ qx.Mixin.define("qx.simulation.MGlobalErrorHandling",
     _addGlobalErrorHandler : function(win)
     {
       var qxWin = win || "selenium.qxStoredVars['autWindow']";
-      qx.simulation.qxSelenium.getEval(qxWin + ".qx.Simulation.errorStore = [];");
+      this.qxSelenium.getEval(qxWin + ".qx.Simulation.errorStore = [];");
       
       var addHandler = function(autWin)
       {
@@ -72,7 +72,7 @@ qx.Mixin.define("qx.simulation.MGlobalErrorHandling",
       };
       
       this.addOwnFunction("addGlobalErrorHandler", addHandler);
-      qx.simulation.qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.addGlobalErrorHandler(" + qxWin + ");");  
+      this.qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.addGlobalErrorHandler(" + qxWin + ");");  
     },
     
     /**
@@ -107,7 +107,7 @@ qx.Mixin.define("qx.simulation.MGlobalErrorHandling",
     getGlobalErrors : function(win)
     {
       var qxWin = win || "selenium.qxStoredVars['autWindow']";
-      var exceptions = qx.simulation.qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.getGlobalErrors(" + qxWin + ")");
+      var exceptions = this.qxSelenium.getEval("selenium.qxStoredVars['autWindow'].qx.Simulation.getGlobalErrors(" + qxWin + ")");
       exceptions = String(exceptions);
       if (!exceptions.length > 0) {
         return [];
@@ -125,8 +125,8 @@ qx.Mixin.define("qx.simulation.MGlobalErrorHandling",
     clearGlobalErrorStore : function(win)
     {
       var targetWin = win || "selenium.qxStoredVars['autWindow']";
-      qx.simulation.qxSelenium.getEval(targetWin + ".qx.Simulation.errorStore = [];");
-      var ex = qx.simulation.qxSelenium.getEval(targetWin + ".qx.Simulation.errorStore;");
+      this.qxSelenium.getEval(targetWin + ".qx.Simulation.errorStore = [];");
+      var ex = this.qxSelenium.getEval(targetWin + ".qx.Simulation.errorStore;");
     }
   }
 });

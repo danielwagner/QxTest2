@@ -31,6 +31,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
 
   construct : function()
   {
+    this.base(arguments);
     this.startDate = new Date();
     this.testFailed = false;
     this.errorCount = 0;
@@ -81,7 +82,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
         qx.Loader.require(["qx.simulation.MEventSupport"]);
         qx.Class.include(qx.simulation.QxSimulationBase, qx.simulation.MEventSupport);
         this._addListenerSupport();
-        qx.simulation.qxSelenium.getEval('selenium.qxStoredVars["eventStore"] = [];');
+        this.qxSelenium.getEval('selenium.qxStoredVars["eventStore"] = [];');
       }
 
     },    
@@ -100,7 +101,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
      * Logs the test browser's user agent string.
      */
     logUserAgent : function(){
-      var agent = qx.simulation.qxSelenium.getEval('navigator.userAgent');
+      var agent = this.qxSelenium.getEval('navigator.userAgent');
       this.info("User agent: " + agent);
     },
 
@@ -134,7 +135,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
     {
       if (qx.simulation.config.getSetting("disposerDebug", false)) {
         var getDisposerDebugLevel = qx.simulation.QxSimulation.AUTWINDOW + ".qx.core.Setting.get('qx.disposerDebugLevel')";
-        var disposerDebugLevel = qx.simulation.qxSelenium.getEval(getDisposerDebugLevel);
+        var disposerDebugLevel = this.qxSelenium.getEval(getDisposerDebugLevel);
         
         if (parseInt(disposerDebugLevel, 10) > 0 ) {
           this.qxShutdown();
@@ -171,7 +172,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
      */
     logRingBufferEntries : function()
     {
-      var debugLog = qx.simulation.qxSelenium.getEval(qx.simulation.QxSimulation.AUTWINDOW + ".qx.Simulation.getRingBufferEntries()");
+      var debugLog = this.qxSelenium.getEval(qx.simulation.QxSimulation.AUTWINDOW + ".qx.Simulation.getRingBufferEntries()");
       debugLog = String(debugLog);
       var debugLogArray = debugLog.split("|");
       
@@ -211,7 +212,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
      */
     qxShutdown : function()
     {
-      simulation.qxSelenium.getEval(qx.simulation.QxSimulation.AUTWINDOW + '.qx.core.ObjectRegistry.shutdown()', "Shutting down qooxdoo application");
+      this.qxSelenium.getEval(qx.simulation.QxSimulation.AUTWINDOW + '.qx.core.ObjectRegistry.shutdown()', "Shutting down qooxdoo application");
     },
     
     /**
@@ -223,7 +224,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
     qxOpen : function(uri)
     {
       var openUri = uri || qx.simulation.config.getSetting("autHost") + "" + qx.simulation.config.getSetting("autPath");
-      qx.simulation.qxSelenium.open(openUri);
+      this.qxSelenium.open(openUri);
       this.setupEnvironment();
     },
     
@@ -241,7 +242,7 @@ qx.Class.define("qx.simulation.QxSimulation", {
       var result = null;    
       var desc = description || "Running QxSelenium command " + command;
       try {
-        result = qx.simulation.qxSelenium[command].apply(qx.simulation.qxSelenium, params);
+        result = this.qxSelenium[command].apply(this.qxSelenium, params);
       }
       catch(ex) {
         if (ex.javaException) {

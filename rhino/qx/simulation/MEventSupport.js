@@ -55,12 +55,12 @@ qx.Mixin.define("qx.simulation.MEventSupport",
      */
     addListener : function(locator, event, callback)
     {
-      var objectHash = qx.simulation.qxSelenium.getQxObjectHash(locator);
+      var objectHash = this.qxSelenium.getQxObjectHash(locator);
       var callbackName = event + "_" + new Date().getTime(); 
       this.addOwnFunction(callbackName, callback);
       var callbackInContext = 'selenium.qxStoredVars["autWindow"].qx.Simulation["' + callbackName + '"]';  
       var cmd = 'selenium.qxStoredVars["autWindow"].qx.Simulation.addListener("' + objectHash + '", "' + event + '", ' + callbackInContext + ')';
-      return qx.simulation.qxSelenium.getEval(cmd);
+      return this.qxSelenium.getEval(cmd);
     },
 
     /**
@@ -76,9 +76,9 @@ qx.Mixin.define("qx.simulation.MEventSupport",
     removeListenerById : function(locator, listenerId)
     {
       listenerId = String(listenerId).replace(/"/, '\\"');
-      var objectHash = qx.simulation.qxSelenium.getQxObjectHash(locator);
+      var objectHash = this.qxSelenium.getQxObjectHash(locator);
       var cmd = 'selenium.qxStoredVars["autWindow"].qx.Simulation.removeListenerById("' + objectHash + '", "' + listenerId + '")';
-      var result = qx.simulation.qxSelenium.getEval(cmd);
+      var result = this.qxSelenium.getEval(cmd);
       return String(result) == "true";
     },
 
@@ -115,7 +115,7 @@ qx.Mixin.define("qx.simulation.MEventSupport",
         cmd += ".";
       }
       cmd += detailString;
-      return qx.simulation.qxSelenium.getEval(cmd);
+      return this.qxSelenium.getEval(cmd);
     },
 
     /**
@@ -123,7 +123,7 @@ qx.Mixin.define("qx.simulation.MEventSupport",
      */
     clearEventStore : function()
     {
-      qx.simulation.qxSelenium.getEval('selenium.qxStoredVars["eventStore"] = []');
+      this.qxSelenium.getEval('selenium.qxStoredVars["eventStore"] = []');
     },
 
     /**
@@ -133,7 +133,7 @@ qx.Mixin.define("qx.simulation.MEventSupport",
      */
     getStoredEventCount : function()
     {
-      var storedEvents = qx.simulation.qxSelenium.getEval('selenium.qxStoredVars["eventStore"].length');
+      var storedEvents = this.qxSelenium.getEval('selenium.qxStoredVars["eventStore"].length');
       return parseInt(storedEvents, 10);
     }
   }

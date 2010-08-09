@@ -67,7 +67,7 @@ qx.Mixin.define("qx.simulation.MApplicationLogging",
       var qxWin = win || "selenium.qxStoredVars['autWindow']";
       var rb = "new " + qxWin + ".qx.log.appender.RingBuffer()";
       this.storeEval(rb, "ringBuffer");  
-      var ret = qx.simulation.qxSelenium.getEval(qxWin + ".qx.log.Logger.register(selenium.qxStoredVars['ringBuffer'])");
+      var ret = this.qxSelenium.getEval(qxWin + ".qx.log.Logger.register(selenium.qxStoredVars['ringBuffer'])");
     }
 
   }
