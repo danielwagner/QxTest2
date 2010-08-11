@@ -30,7 +30,7 @@ qx.Class.define("qx.simulation.unit.TestSuite", {
   construct : function()
   {
     var testClassList = qx.simulation.config.getSetting("testClasses");
-    var basePath = qx.simulation.config.getSetting("testClassPath");
+    var basePath = qx.simulation.config.getSetting("classPath");
     this.testClasses = [];
 
     for (var i=0,l=testClassList.length; i<l; i++) {

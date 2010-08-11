@@ -128,7 +128,8 @@ qx.Class.define("qx.Loader", {
      */
     require : function(classNames, basePath)
     {
-      var basePath = basePath || globalObj.basePath; 
+      //var basePath = basePath || qx.$$basePath; 
+      var basePath = basePath || qx.$$basePath;
       for (var i=0,l=classNames.length; i<l; i++) { 
         var className = classNames[i];
         
