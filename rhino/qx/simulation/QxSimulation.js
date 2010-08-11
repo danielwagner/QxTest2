@@ -67,8 +67,8 @@ qx.Class.define("qx.simulation.QxSimulation", {
       if (qx.simulation.config.getSetting("globalErrorLogging", false) || qx.simulation.config.getSetting("testEvents", false)) {
         qx.Loader.require(["qx.simulation.MGlobalErrorHandling"]);
         qx.Class.include(qx.simulation.QxSimulationBase, qx.simulation.MGlobalErrorHandling);
-        this._addGlobalErrorHandler();
-        this._addGlobalErrorGetter();
+        this.addGlobalErrorHandler();
+        this.addGlobalErrorGetter();
       }
       
       if (qx.simulation.config.getSetting("applicationLog", false) || qx.simulation.config.getSetting("disposerDebug", false)) {

@@ -35,7 +35,7 @@ qx.Mixin.define("qx.simulation.MGlobalErrorHandling",
      * accessible to the current Selenium instance. Default: The AUT's window.
      * @lint ignoreUndefined(selenium)
      */
-    _addGlobalErrorHandler : function(win)
+    addGlobalErrorHandler : function(win)
     {
       var qxWin = win || "selenium.qxStoredVars['autWindow']";
       this.qxSelenium.getEval(qxWin + ".qx.Simulation.errorStore = [];");
@@ -85,7 +85,7 @@ qx.Mixin.define("qx.simulation.MGlobalErrorHandling",
      * 
      * @lint ignoreUndefined(selenium)
      */
-    _addGlobalErrorGetter : function(win)
+    addGlobalErrorGetter : function(win)
     {
       var getGlobalErrors = function(win)
       {
