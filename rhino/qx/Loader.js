@@ -18,8 +18,10 @@
 ************************************************************************ */
 
 var globalObj = this;
-// Create the simulation namespace if it doesn't exist
-//qx.Loader = {};
+
+/**
+ * Loads JavaScript code from the file system.
+ */
 
 qx.Class.define("qx.Loader", {
 
@@ -34,8 +36,10 @@ qx.Class.define("qx.Loader", {
      * are treated as *.js files. Example: load("bar.Baz", "./foo") loads the file 
      * ./foo/bar/Baz.js
      * 
-     * @param {String} className The full name of the class to be loaded
-     * @param {String} basePath File system base path
+     * @param className {String} The full name of the class to be loaded
+     * @param basePath {String} File system base path
+     * 
+     * @lint ignoreUndefined(globalObj,load)
      */
     load : function(className, basePath)
     {
@@ -65,9 +69,11 @@ qx.Class.define("qx.Loader", {
     /**
      * Reads a JavaScript file and returns the contents as a string.
      * 
-     * @param {String} className The file's namespace
-     * @param {String} basePath File system base path
+     * @param className {String} The file's namespace
+     * @param basePath {String} File system base path
      * @return {String} The file's contents
+     * 
+     * @lint ignoreUndefined(readFile,globalObj)
      */
     readClassFile : function(className, basePath)
     {
@@ -98,8 +104,10 @@ qx.Class.define("qx.Loader", {
      * Utility function that returns an object identified by a path, e.g.
      * ["foo", "bar", "baz"] => foo.bar.baz
      * 
-     * @param {} nsArr
-     * @return {}
+     * @param nsArr {String[]} Array containing path information
+     * @return {Object} The found object
+     * 
+     * @lint ignoreUndefined(globalObj)
      */
     getObjectByName : function(nsArr)
     {
@@ -113,8 +121,10 @@ qx.Class.define("qx.Loader", {
     /**
      * Takes a list of class names and loads them if they're not already defined.
      * 
-     * @param {Array} classNames List of classes, e.g. ["foo.Bar", "foo.Baz"]
-     * @param {String} basePath Directory in which the source files are located
+     * @param classNames{Array} List of classes, e.g. ["foo.Bar", "foo.Baz"]
+     * @param basePath {String} Directory in which the source files are located
+     * 
+     * @lint ignoreUndefined(globalObj)
      */
     require : function(classNames, basePath)
     {
@@ -143,10 +153,13 @@ qx.Class.define("qx.Loader", {
      * object or the name of a file to be loaded using 
      * qx.Loader.readClassFile
      * 
-     * @param {Function} includeIn The class to which mixin code should be added
-     * @param {Object|String} mixin Object containing mixin code or namespace array
-     * referencing a mixin file
-     * @param {String?} basePath base directory for mixin file
+     * @param includeIn {Function} The class to which mixin code should be added
+     * @param mixin {Object|String[]} Object containing mixin code or namespace 
+     * array referencing a mixin file
+     * @param basePath {String?} base directory for mixin file
+     * 
+     * @lint ignoreUndefined(globalObj)
+     * @lint ignoreDeprecated(eval)
      */
     include : function(includeIn, mixin, basePath)
     {
@@ -175,4 +188,3 @@ qx.Class.define("qx.Loader", {
 
   }
 });
-

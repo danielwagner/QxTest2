@@ -17,11 +17,11 @@
 
 ************************************************************************ */
 
+qx.Loader.require(["qx.simulation.QxSimulation"]);
+
 /**
  * Base class for unit test-style GUI interaction tests.
  */
-
-qx.Loader.require(["qx.simulation.QxSimulation"]);
 
 qx.Class.define("qx.simulation.unit.TestCase", {
 

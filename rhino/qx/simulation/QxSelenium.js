@@ -30,8 +30,7 @@ qx.Class.define("qx.simulation.QxSelenium", {
      * Imports the QxSelenium (Java) class, and creates an instance.
      * 
      * @return {Object} The configured QxSelenium object
-     * @lint ignoreGlobal(importClass)
-     * @lint ignoreGlobal(QxSelenium)
+     * @lint ignoreUndefined(importClass,QxSelenium)
      */
     create : function()
     {

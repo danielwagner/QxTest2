@@ -28,6 +28,8 @@ qx.Mixin.define("qx.simulation.MEventSupport",
     /**
      * Adds utility functions to the AUT that allow attaching and removing event
      * listeners to qooxdoo objects identified by their object registry hash. 
+     * 
+     * @lint ignoreUndefined(selenium)
      */
     _addListenerSupport : function()
     {
@@ -90,6 +92,8 @@ qx.Mixin.define("qx.simulation.MEventSupport",
      * qooxdoo widget
      * @param event {String} The name of the event to listen for
      * @return {String} The listener's ID as returned by addListener
+     * 
+     * @lint ignoreUndefined(selenium)
      */
     storeEvent : function(locator, event)
     {

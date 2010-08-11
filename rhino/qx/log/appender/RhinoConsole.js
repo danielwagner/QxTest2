@@ -25,7 +25,13 @@ qx.Class.define("qx.log.appender.RhinoConsole", {
 
   statics:
   {
+    /**
+     * java.lang.System.out 
+     */
     __OUT : java.lang.System.out,
+    /**
+     * java.lang.System.err 
+     */
     __ERR : java.lang.System.err,
 
     /**

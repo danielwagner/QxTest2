@@ -17,11 +17,11 @@
 
 ************************************************************************ */
 
+qx.Loader.require(["qx.simulation.unit.TestCase"]);
+
 /**
  * Loads a list of test classes and prepares them to be run.
  */
-
-qx.Loader.require(["qx.simulation.unit.TestCase"]);
 
 qx.Class.define("qx.simulation.unit.TestSuite", {
 

@@ -17,11 +17,11 @@
 
 ************************************************************************ */
 
+qx.Loader.require(["qx.simulation.QxSelenium"]);
+
 /**
  * Base class for automated GUI tests of qooxdoo applications using QxSelenium.
  */
-
-qx.Loader.require(["qx.simulation.QxSelenium"]);
 
 qx.Class.define("qx.simulation.QxSimulationBase", {
   
@@ -88,7 +88,7 @@ qx.Class.define("qx.simulation.QxSimulationBase", {
      * <code>getEval('selenium.qxStoredVars["keyName"]')</code> 
      *
      * @param code {String} JavaScript snippet to be evaluated
-     * @param varName {String} The name for the key the eval result will be 
+     * @param keyName {String} The name for the key the eval result will be 
      * stored under.
      */
     storeEval : function(code, keyName)

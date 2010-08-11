@@ -17,13 +17,13 @@
 
 ************************************************************************ */
 
+qx.Loader.require(["qx.simulation.QxSimulationBase"]);
+
 /**
  * Automated GUI test of a qooxdoo application using QxSelenium. Provides access
  * to the AUT's log messages and any exceptions caught by qooxdoo's global error
  * handling. Also supports event testing.
  */
-
-qx.Loader.require(["qx.simulation.QxSimulationBase"]);
 
 qx.Class.define("qx.simulation.QxSimulation", {
 
@@ -89,6 +89,8 @@ qx.Class.define("qx.simulation.QxSimulation", {
     
     /**
      * Logs basic information about the test environment.
+     * 
+     * @lint ignoreUndefined(environment)
      */
     logEnvironment : function()
     {
@@ -246,12 +248,12 @@ qx.Class.define("qx.simulation.QxSimulation", {
       }
       catch(ex) {
         if (ex.javaException) {
-          description = description + " Java Exception was: " + ex.javaException;
+          desc = desc + " Java Exception was: " + ex.javaException;
         }
         if (ex.rhinoException) {
-          description = description + " Rhino Exception was: " + ex.rhinoException;
+          desc = desc + " Rhino Exception was: " + ex.rhinoException;
         }
-        this.error("ERROR " + description);
+        this.error("ERROR " + desc);
       }
       return result;
     }
