@@ -146,45 +146,6 @@ qx.Class.define("qx.Loader", {
           qx.Loader.load(className, basePath);
         }    
       }
-    },
-
-    /**
-     * Adds the properties of a mixin to a given class. The mixin can either be an
-     * object or the name of a file to be loaded using 
-     * qx.Loader.readClassFile
-     * 
-     * @param includeIn {Function} The class to which mixin code should be added
-     * @param mixin {Object|String[]} Object containing mixin code or namespace 
-     * array referencing a mixin file
-     * @param basePath {String?} base directory for mixin file
-     * 
-     * @lint ignoreUndefined(globalObj)
-     * @lint ignoreDeprecated(eval)
-     */
-    include : function(includeIn, mixin, basePath)
-    {
-      if (!includeIn) {
-        throw new Error("qx.Loader.include: No class to include into!");
-      }
-     
-      var basePath = basePath || globalObj.basePath;
-      
-      if (typeof mixin == "string") {
-        var mixinStr = qx.Loader.readClassFile(mixin, basePath);
-        eval("qx.Loader.__tempObj = " + mixinStr);
-        mixin = qx.Loader.__tempObj;
-      }
-      
-      if (!typeof mixin == "object") {
-        throw new Error("qx.Loader.include: Invalid mixin");
-      }
-      
-      for (var prop in mixin) {
-        if (typeof mixin[prop] == "function") {
-          includeIn.prototype[prop] = mixin[prop];
-        }
-      }
     }
-
   }
 });
