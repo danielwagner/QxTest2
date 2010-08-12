@@ -116,6 +116,21 @@ qx.Mixin.define("qx.simulation.MGlobalErrorHandling",
       var globalErrors = String(exceptions).split("|");
       return globalErrors;
     },
+    
+    /**
+     * Goes through the AUT's global error store and throws an exception for 
+     * each entry.
+     * 
+     * @param win {String} JavaScript snippet that evaluates as a Window object 
+     * accessible to the current Selenium instance. Default: The AUT's window.
+     */
+    throwGlobalErrors : function(win)
+    {
+      var globalErrors = this.getGlobalErrors(win);
+      for (var i=0; i<globalErrors.length; i++) {
+        throw new Error(globalErrors[i]);
+      }
+    },
 
     /**
      * Empties the given window's global exception store.
