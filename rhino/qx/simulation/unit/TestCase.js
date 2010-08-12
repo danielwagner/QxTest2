@@ -18,6 +18,7 @@
 ************************************************************************ */
 
 qx.Loader.require(["qx.simulation.QxSimulation"]);
+qx.Loader.require(["qx.core.Assert", "qx.core.MAssert"], qx.$$path + "/framework/source/class");
 
 /**
  * Base class for unit test-style GUI interaction tests.
@@ -26,6 +27,8 @@ qx.Loader.require(["qx.simulation.QxSimulation"]);
 qx.Class.define("qx.simulation.unit.TestCase", {
 
   extend : qx.simulation.QxSimulation,
+  
+  include : qx.core.MAssert,
 
   construct : function()
   {
