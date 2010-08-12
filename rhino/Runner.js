@@ -26,8 +26,9 @@ qx.$$args = arguments ? arguments : "";
 (function() {
   for (var i=0; i<qx.$$args.length; i++) {
     var keyVal = qx.$$args[i].split("=");
-    if (keyVal[0] == "basePath") {
-      qx.$$basePath = keyVal[1];
+    if (keyVal[0] == "qxPath") {
+      qx.$$path = keyVal[1];
+      qx.$$basePath = keyVal[1] + "/tool/rhino";
       break;
     }
   }
@@ -46,7 +47,7 @@ qx.$$args = arguments ? arguments : "";
   
   if (qx.simulation.config.getSetting("testClasses", false)) {
     // JUnit-style test
-    qx.Loader.require(["qx.simulation.unit.TestSuite"])
+    qx.Loader.require(["qx.simulation.unit.TestSuite"]);
     var suite = new qx.simulation.unit.TestSuite();
     suite.runTests();  
   }
