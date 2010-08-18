@@ -42,6 +42,9 @@ qx.Class.define("qx.simulation.QxSimulationBase", {
     {
       this.qxSelenium.start();
       this.qxSelenium.setTimeout(qx.simulation.config.getSetting("globalTimeout", 120000));
+      if (qx.simulation.config.getSetting("windowMaximize", false)) {
+        this.qxSelenium.windowMaximize();
+      }
       this.qxSelenium.open(qx.simulation.config.getSetting("autHost") + "" + qx.simulation.config.getSetting("autPath"));
       this.qxSelenium.setSpeed(qx.simulation.config.getSetting("stepSpeed", "250"));
       this.setupEnvironment();
