@@ -17,59 +17,40 @@
 
 ************************************************************************ */
 
-simulation.loader.require(["simulation.log.Logger"]);
+/**
+ * Writes log messages to a file.
+ */
 
-simulation.log.appender.File = function(filePath, prefix)
-{
-  if (!filePath) {
-    throw new Error("simulation.log.File: No log file path specified!");
+qx.Class.define("qx.log.appender.File", {
+
+  extend : qx.core.Object,
+  
+  statics :
+  {
+    LOGFILEPATH : "log.txt",
+
+    /**
+     * Process a log entry object from qooxdoo's logging system.
+     * 
+     * @param entry {Map} Log entry object
+     */
+    process : function(entry)
+    {
+      var fstream = new java.io.FileWriter(qx.log.appender.File.LOGFILEPATH, true);
+      var buffer = new java.io.BufferedWriter(fstream);
+      for (var prop in entry) {
+        if (prop == "items") {
+          var items = entry[prop];
+          for (var p in items) {
+            var item = items[p];
+            buffer.write(item.text);
+            buffer.newLine();
+          }
+        }
+      }
+      buffer.close();
+    }
+    
   }
-  this.LOGFILEPATH = filePath || null;
-  this.PREFIX = prefix || "";
   
-  this.log = function(logMessage, level)
-  {
-    var msg = logMessage ? logMessage : "";
-    var lvl = level ? level : "debug";
-  
-    var logFile = this.__getLogFile(this.LOGFILEPATH);
-    logFile.write(this.PREFIX + " " + msg);
-    logFile.newLine();
-    logFile.close();
-  };
-  
-  this.debug = function(logMessage)
-  {
-    if (logMessage) {
-      this.log(logMessage, "debug");
-    }
-  };
-  
-  this.info = function(logMessage)
-  {
-    if (logMessage) {
-      this.log(logMessage, "info");
-    }
-  };
-  
-  this.warn = function(logMessage)
-  {
-    if (logMessage) {
-      this.log(logMessage, "warn");
-    }
-  };
-  
-  this.error = function(logMessage)
-  {
-    if (logMessage) {
-      this.log(logMessage, "error");
-    }
-  };
-  
-  this.__getLogFile = function(filePath)
-  {
-    var fstream = new java.io.FileWriter(filePath, true);
-    var out = new java.io.BufferedWriter(fstream);
-    return out;
-  };
-};
+});
