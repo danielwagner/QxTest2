@@ -128,7 +128,6 @@ qx.Class.define("qx.Loader", {
      */
     require : function(classNames, basePath)
     {
-      //var basePath = basePath || qx.$$basePath; 
       var basePath = basePath || qx.$$basePath;
       for (var i=0,l=classNames.length; i<l; i++) { 
         var className = classNames[i];
@@ -138,8 +137,6 @@ qx.Class.define("qx.Loader", {
           if (!clazz) {
             // class object doesn't exist, load the file
             qx.Loader.load(className, basePath);
-          } else { 
-            print("Class " + className + " already loaded."); 
           }
         }
         catch(ex) {
