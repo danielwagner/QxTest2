@@ -53,11 +53,17 @@ qx.Mixin.define("qx.simulation.MEventSupport",
      * @param event {String} Name of the event to listen for
      * @param callback {Function} Javascript code to be executed if the event is
      * fired
+     * @param script {String?} Javascript snippet to be executed in the widget's
+     * context
      * @return {String} the generated listener's ID
      */
-    addListener : function(locator, event, callback)
+    addListener : function(locator, event, callback, script)
     {
-      var objectHash = this.qxSelenium.getQxObjectHash(locator);
+      if (script) {
+        var objectHash = this.qxSelenium.getQxObjectHash(locator, script);
+      } else {
+        var objectHash = this.qxSelenium.getQxObjectHash(locator);
+      }
       var callbackName = event + "_" + new Date().getTime(); 
       this.addOwnFunction(callbackName, callback);
       var callbackInContext = 'selenium.qxStoredVars["autWindow"].qx.Simulation["' + callbackName + '"]';  
@@ -91,17 +97,19 @@ qx.Mixin.define("qx.simulation.MEventSupport",
      * @param locator {String} A (Qx)Selenium locator string that finds a 
      * qooxdoo widget
      * @param event {String} The name of the event to listen for
+     * @param script {String?} Javascript snippet to be executed in the widget's
+     * context
      * @return {String} The listener's ID as returned by addListener
      * 
      * @lint ignoreUndefined(selenium)
      */
-    storeEvent : function(locator, event)
+    storeEvent : function(locator, event, script)
     {
       var callback = function(ev)
       {
         selenium.qxStoredVars["eventStore"].push(ev.clone());
       };
-      return this.addListener(locator, event, callback);
+      return this.addListener(locator, event, callback, script);
     },
 
     /**
